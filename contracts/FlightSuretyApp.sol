@@ -24,7 +24,8 @@ contract FlightSuretyApp {
     uint8 private constant STATUS_CODE_LATE_TECHNICAL = 40;
     uint8 private constant STATUS_CODE_LATE_OTHER = 50;
 
-    address private contractOwner;          // Account used to deploy contract
+    address private contractOwner; // Account used to deploy contract
+    bool private operational = true;
 
     struct Flight {
         bool isRegistered;
@@ -50,8 +51,7 @@ contract FlightSuretyApp {
     */
     modifier requireIsOperational()
     {
-        // Modify to call data contract's status
-        require(true, "Contract is currently not operational");
+        require(operational, "Contract is currently not operational");
         _;
         // All modifiers require an "_" which indicates where the function body will be added
     }
@@ -73,11 +73,7 @@ contract FlightSuretyApp {
     * @dev Contract constructor
     *
     */
-    constructor
-    (
-    )
-    public
-    {
+    constructor() public {
         contractOwner = msg.sender;
     }
 
@@ -85,13 +81,12 @@ contract FlightSuretyApp {
     /*                                       UTILITY FUNCTIONS                                  */
     /********************************************************************************************/
 
-    function isOperational()
-    public
-    pure
-    returns (bool)
-    {
-        return true;
-        // Modify to call data contract's status
+    function isOperational() public view returns (bool) {
+        return operational;
+    }
+
+    function setOperatingStatus(bool mode) external requireContractOwner {
+        operational = mode;
     }
 
     /********************************************************************************************/
@@ -103,13 +98,7 @@ contract FlightSuretyApp {
      * @dev Add an airline to the registration queue
      *
      */
-    function registerAirline
-    (
-    )
-    external
-    pure
-    returns (bool success, uint256 votes)
-    {
+    function registerAirline() external pure returns (bool success, uint256 votes) {
         return (success, 0);
     }
 
@@ -118,12 +107,7 @@ contract FlightSuretyApp {
      * @dev Register a future flight for insuring.
      *
      */
-    function registerFlight
-    (
-    )
-    external
-    pure
-    {
+    function registerFlight() external pure {
 
     }
 
@@ -131,16 +115,7 @@ contract FlightSuretyApp {
      * @dev Called after oracle has updated flight status
      *
      */
-    function processFlightStatus
-    (
-        address airline,
-        string memory flight,
-        uint256 timestamp,
-        uint8 statusCode
-    )
-    internal
-    pure
-    {
+    function processFlightStatus(address airline, string memory flight, uint256 timestamp, uint8 statusCode) internal pure {
     }
 
 
@@ -204,12 +179,7 @@ contract FlightSuretyApp {
 
 
     // Register an oracle with the contract
-    function registerOracle
-    (
-    )
-    external
-    payable
-    {
+    function registerOracle() external payable {
         // Require registration fee
         require(msg.value >= REGISTRATION_FEE, "Registration fee is required");
 
@@ -221,7 +191,7 @@ contract FlightSuretyApp {
             });
     }
 
-    function getMyIndexes() view external returns (uint8[3] memory){
+    function getMyIndexes() view external returns (uint8[3] memory) {
         require(oracles[msg.sender].isRegistered, "Not registered as an oracle");
 
         return oracles[msg.sender].indexes;

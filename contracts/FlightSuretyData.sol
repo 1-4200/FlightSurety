@@ -12,10 +12,19 @@ contract FlightSuretyData {
     address private contractOwner;                                      // Account used to deploy contract
     bool private operational = true;                                    // Blocks all state changes throughout the contract if false
 
+    struct Airline {
+        string name;
+        bool isRegistered;
+        bool isFunded;
+    }
+
+    mapping(address => Airline) private registeredAirlines;
+    address[] airlines;
+
     /********************************************************************************************/
     /*                                       EVENT DEFINITIONS                                  */
     /********************************************************************************************/
-
+    event eventAirlineRegistered(address);
 
     /**
     * @dev Constructor
@@ -51,6 +60,15 @@ contract FlightSuretyData {
         _;
     }
 
+    modifier requireNot0xAddress(address sentAddress) {
+        require(sentAddress != address(0));
+        _;
+    }
+
+    modifier requireNotRegisteredAirlineAddress(address sentAddress) {
+        require(registeredAirlines[sentAddress].isRegistered == false, "Airline is already registered");
+    }
+
     /********************************************************************************************/
     /*                                       UTILITY FUNCTIONS                                  */
     /********************************************************************************************/
@@ -83,7 +101,10 @@ contract FlightSuretyData {
      *      Can only be called from FlightSuretyApp contract
      *
      */
-    function registerAirline() external pure {
+    function registerAirline(address airline) external requireContractOwner requireIsOperational requireNot0xAddress(airline) requireNotRegisteredAirlineAddress(airline) {
+        registeredAirlines[airline].isRegistered = true;
+        airlines.push(airline);
+        emit eventAirlineRegistered(airline);
     }
 
 
@@ -125,12 +146,9 @@ contract FlightSuretyData {
     * @dev Fallback function for funding smart contract.
     *
     */
-    //fallback()
-    //external
-    //payable
-    //{
-    //fund();
-    //}
+    //    fallback() external payable {
+    //        fund();
+    //    }
 
 
 }
