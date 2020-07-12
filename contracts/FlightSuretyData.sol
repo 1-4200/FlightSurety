@@ -21,6 +21,15 @@ contract FlightSuretyData {
     mapping(address => Airline) private registeredAirlines;
     address[] airlines;
 
+    struct Flight {
+        bool isRegistered;
+        uint8 statusCode;
+        uint256 updatedTimestamp;
+        address airline;
+    }
+
+    mapping(byte32 => Flight) private registeredFlights;
+    byte32[] flights;
     /********************************************************************************************/
     /*                                       EVENT DEFINITIONS                                  */
     /********************************************************************************************/
@@ -61,12 +70,18 @@ contract FlightSuretyData {
     }
 
     modifier requireNot0xAddress(address sentAddress) {
-        require(sentAddress != address(0));
+        require(sentAddress != address(0), "Invalid address");
         _;
     }
 
     modifier requireNotRegisteredAirlineAddress(address sentAddress) {
         require(registeredAirlines[sentAddress].isRegistered == false, "Airline is already registered");
+        _;
+    }
+
+    modifier requireRegisteredAirlineAddress(address sentAddress) {
+        require(registeredAirlines[sentAddress].isRegistered == true, "Airline is not registered");
+        _;
     }
 
     /********************************************************************************************/
@@ -101,8 +116,9 @@ contract FlightSuretyData {
      *      Can only be called from FlightSuretyApp contract
      *
      */
-    function registerAirline(address airline) external requireContractOwner requireIsOperational requireNot0xAddress(airline) requireNotRegisteredAirlineAddress(airline) {
-        registeredAirlines[airline].isRegistered = true;
+    function registerAirline(address airline, string calldata name) external requireContractOwner requireIsOperational requireNot0xAddress(airline) requireNotRegisteredAirlineAddress(airline) {
+        Airline memory newAirline = Airline({name : name, isRegistered : true, isFunded : false});
+        registeredAirlines[airline] = newAirline;
         airlines.push(airline);
         emit eventAirlineRegistered(airline);
     }
@@ -112,7 +128,8 @@ contract FlightSuretyData {
      * @dev Buy insurance for a flight
      *
      */
-    function buy() external payable {
+    function buy(address airline, string memory flight, uint256 timestamp) external payable requireIsOperational requireNot0xAddress(airline) requireRegisteredAirlineAddress(airline) {
+        bytes32 flightKey = getFlightKey(airline, flight, timestamp);
 
     }
 
