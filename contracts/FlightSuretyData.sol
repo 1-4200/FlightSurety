@@ -170,7 +170,11 @@ contract FlightSuretyData {
      *  @dev Transfers eligible payout funds to insuree
      *
     */
-    function pay() external pure {
+    function pay(address payable passenger) external {
+        require(passengersRefund[passenger] > 0, "Passenger has no balance");
+        uint256 refund = passengersRefund[passenger];
+        passengersRefund[passenger] = 0;
+        passenger.transfer(refund);
     }
 
     /**
@@ -178,7 +182,8 @@ contract FlightSuretyData {
      *      resulting in insurance payouts, the contract should be self-sustaining
      *
      */
-    function fund() public payable {
+    function fund(address airline) public payable {
+        registeredAirlines[airline].isFunded = true;
     }
 
     function getFlightKey(address airline, string memory flight, uint256 timestamp) pure internal returns (bytes32) {
@@ -189,9 +194,9 @@ contract FlightSuretyData {
     * @dev Fallback function for funding smart contract.
     *
     */
-    //    fallback() external payable {
-    //        fund();
-    //    }
+    fallback() external payable {
+        fund(tx.origin);
+    }
 
 
 }
