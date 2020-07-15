@@ -16,6 +16,8 @@ contract FlightSuretyApp {
     /*                                       DATA VARIABLES                                     */
     /********************************************************************************************/
 
+    FlightSuretyData flightSuretyData;
+
     // Flight status codees
     uint8 private constant STATUS_CODE_UNKNOWN = 0;
     uint8 private constant STATUS_CODE_ON_TIME = 10;
@@ -27,6 +29,10 @@ contract FlightSuretyApp {
     address private contractOwner; // Account used to deploy contract
     bool private operational = true;
 
+    // Only existing airline may register a new airline until there are at least four airlines registered
+    // Registration of fifth and subsequent airlines requires multi-party consensus of 50% of registered airlines
+    uint8 private constant FLIGHT_NUMBER_REQUIREMENT_BEFORE_CONSENSUS = 4;
+
     struct Flight {
         bool isRegistered;
         uint8 statusCode;
@@ -35,7 +41,6 @@ contract FlightSuretyApp {
     }
 
     mapping(bytes32 => Flight) private flights;
-
 
     /********************************************************************************************/
     /*                                       FUNCTION MODIFIERS                                 */
@@ -65,6 +70,11 @@ contract FlightSuretyApp {
         _;
     }
 
+    modifier requireNotRegisteredAirlineAddress(address sentAddress) {
+        require(registeredAirlines[sentAddress].isRegistered == false, "Airline is already registered");
+        _;
+    }
+
     /********************************************************************************************/
     /*                                       CONSTRUCTOR                                        */
     /********************************************************************************************/
@@ -73,8 +83,9 @@ contract FlightSuretyApp {
     * @dev Contract constructor
     *
     */
-    constructor() public {
+    constructor(address doa) public {
         contractOwner = msg.sender;
+        flightSuretyData = FlightSuretyData(doa);
     }
 
     /********************************************************************************************/
@@ -98,7 +109,13 @@ contract FlightSuretyApp {
      * @dev Add an airline to the registration queue
      *
      */
-    function registerAirline() external pure returns (bool success, uint256 votes) {
+    function registerAirline(address airline, string calldata name) external requireNotRegisteredAirlineAddress(airline) returns (bool success, uint256 votes) {
+        currentRegisteredAirlineCount = flightSuretyData.getRegisteredAirlineCount();
+        if (currentRegisteredAirlineCount < FLIGHT_NUMBER_REQUIREMENT_BEFORE_CONSENSUS) {
+            flightSuretyData.registerAirline(airline, name);
+        } else {
+            
+        }
         return (success, 0);
     }
 
@@ -259,7 +276,18 @@ contract FlightSuretyApp {
 
         return random;
     }
+}
 
-    // endregion
+// endregion
+// FlightSuretyContract interface
+interface FlightSuretyData {
+    // UTILITY FUNCTIONS
+//    function isOperational() public view returns (bool);
+//    function setOperatingStatus(bool mode) external;
 
-}   
+    // SMART CONTRACT FUNCTIONS
+//    function registerAirline(address airline, string calldata name) external;
+//    function buy(address airline, string calldata flight, uint256 timestamp, uint256 multiplier) external payable;
+//    function creditInsurees(bytes32 flightKey) external;
+//    function pay(address payable passenger) external;
+}

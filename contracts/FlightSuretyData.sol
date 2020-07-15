@@ -129,6 +129,10 @@ contract FlightSuretyData {
     /*                                     SMART CONTRACT FUNCTIONS                             */
     /********************************************************************************************/
 
+    function getRegisteredAirlineCount() external view returns(uint256) {
+        return airlines.length;
+    }
+
     /**
      * @dev Add an airline to the registration queue
      *      Can only be called from FlightSuretyApp contract
@@ -190,13 +194,13 @@ contract FlightSuretyData {
         return keccak256(abi.encodePacked(airline, flight, timestamp));
     }
 
-    /**
-    * @dev Fallback function for funding smart contract.
-    *
-    */
-    fallback() external payable {
-        fund(tx.origin);
-    }
+/**
+* @dev Fallback function for funding smart contract.
+*
+*/
+fallback() external payable {
+fund(tx.origin);
+}
 
 
 }
