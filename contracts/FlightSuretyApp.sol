@@ -43,6 +43,12 @@ contract FlightSuretyApp {
     mapping(bytes32 => Flight) private flights;
 
     /********************************************************************************************/
+    /*                                       EVENT DEFINITIONS                                  */
+    /********************************************************************************************/
+    event eventAirlineRegistered(address airline);
+    event eventFlightRegistered(address _airline, string _name, uint256 _timestamp);
+
+    /********************************************************************************************/
     /*                                       FUNCTION MODIFIERS                                 */
     /********************************************************************************************/
 
@@ -70,8 +76,14 @@ contract FlightSuretyApp {
         _;
     }
 
-    modifier requireNotRegisteredAirlineAddress(address sentAddress) {
-        require(registeredAirlines[sentAddress].isRegistered == false, "Airline is already registered");
+    modifier requireNotRegisteredAirlineAddress(address _sentAddress) {
+        require(registeredAirlines[_sentAddress].isRegistered == false, "Airline is already registered");
+        _;
+    }
+
+    modifier requireNotRegisteredFlight(address _sentAddress, string _name, uint256 _timestamp) {
+        bytes32 flightKey = getFlightKey(_sentAddress, _name, _timestamp);
+        require(flightSuretyData.Flight[flightKey].isRegistered == false, "Flight is already registered");
         _;
     }
 
@@ -83,9 +95,9 @@ contract FlightSuretyApp {
     * @dev Contract constructor
     *
     */
-    constructor(address doa) public {
+    constructor(address _doa) public {
         contractOwner = msg.sender;
-        flightSuretyData = FlightSuretyData(doa);
+        flightSuretyData = FlightSuretyData(_doa);
     }
 
     /********************************************************************************************/
@@ -96,8 +108,8 @@ contract FlightSuretyApp {
         return operational;
     }
 
-    function setOperatingStatus(bool mode) external requireContractOwner {
-        operational = mode;
+    function setOperatingStatus(bool _mode) external requireContractOwner {
+        operational = _mode;
     }
 
     /********************************************************************************************/
@@ -109,12 +121,12 @@ contract FlightSuretyApp {
      * @dev Add an airline to the registration queue
      *
      */
-    function registerAirline(address airline, string calldata name) external requireNotRegisteredAirlineAddress(airline) returns (bool success, uint256 votes) {
+    function registerAirline(address _airline, string calldata _name) external requireIsOperational requireNotRegisteredAirlineAddress(airline) returns (bool success, uint256 votes) {
         currentRegisteredAirlineCount = flightSuretyData.getRegisteredAirlineCount();
         if (currentRegisteredAirlineCount < FLIGHT_NUMBER_REQUIREMENT_BEFORE_CONSENSUS) {
-            flightSuretyData.registerAirline(airline, name);
+            flightSuretyData.registerAirline(_airline, _name);
         } else {
-            
+
         }
         return (success, 0);
     }
@@ -124,8 +136,11 @@ contract FlightSuretyApp {
      * @dev Register a future flight for insuring.
      *
      */
-    function registerFlight() external pure {
-
+    function registerFlight(address _airline, string calldata _name, uint256 _timestamp) external requireIsOperational requireNotRegisteredFlight(_airline, _name, _timestamp) {
+        bytes32 flightKey = getFlightKey(_airline, _name, _timestamp);
+        flightSuretyData.registeredFlights[flightKey] = flightSuretyData.Flight({name : _name, isRegistered : true, statusCode : STATUS_CODE_UNKNOWN, updatedTimestamp : _timestamp, airline : _airline, insurances : address(0)[]});
+        flightSuretyData.flights.push(flightKey);
+        emit eventFlightRegistered(_airline, _name, _timestamp);
     }
 
     /**
@@ -282,12 +297,12 @@ contract FlightSuretyApp {
 // FlightSuretyContract interface
 interface FlightSuretyData {
     // UTILITY FUNCTIONS
-//    function isOperational() public view returns (bool);
-//    function setOperatingStatus(bool mode) external;
+    //    function isOperational() public view returns (bool);
+    //    function setOperatingStatus(bool mode) external;
 
     // SMART CONTRACT FUNCTIONS
-//    function registerAirline(address airline, string calldata name) external;
-//    function buy(address airline, string calldata flight, uint256 timestamp, uint256 multiplier) external payable;
-//    function creditInsurees(bytes32 flightKey) external;
-//    function pay(address payable passenger) external;
+    //    function registerAirline(address airline, string calldata name) external;
+    //    function buy(address airline, string calldata flight, uint256 timestamp, uint256 multiplier) external payable;
+    //    function creditInsurees(bytes32 flightKey) external;
+    //    function pay(address payable passenger) external;
 }
