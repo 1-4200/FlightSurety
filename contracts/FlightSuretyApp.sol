@@ -47,6 +47,7 @@ contract FlightSuretyApp {
     /********************************************************************************************/
     event eventAirlineRegistered(address airline);
     event eventFlightRegistered(address _airline, string _name, uint256 _timestamp);
+    event eventFlightStatusUpdated(address _airline, string _name, uint256 _timestamp, uint8 _statusCode);
 
     /********************************************************************************************/
     /*                                       FUNCTION MODIFIERS                                 */
@@ -77,13 +78,19 @@ contract FlightSuretyApp {
     }
 
     modifier requireNotRegisteredAirlineAddress(address _sentAddress) {
-        require(registeredAirlines[_sentAddress].isRegistered == false, "Airline is already registered");
+        require(flightSuretyData.registeredAirlines[_sentAddress].isRegistered == false, "Airline is already registered");
         _;
     }
 
-    modifier requireNotRegisteredFlight(address _sentAddress, string _name, uint256 _timestamp) {
+    modifier requireNotRegisteredFlight(address _sentAddress, string memory _name, uint256 _timestamp) {
         bytes32 flightKey = getFlightKey(_sentAddress, _name, _timestamp);
         require(flightSuretyData.Flight[flightKey].isRegistered == false, "Flight is already registered");
+        _;
+    }
+
+    modifier requireRegisteredFlight(address _sentAddress, string memory _name, uint256 _timestamp) {
+        bytes32 flightKey = getFlightKey(_sentAddress, _name, _timestamp);
+        require(flightSuretyData.Flight[flightKey].isRegistered == true, "Flight is not registered");
         _;
     }
 
@@ -121,8 +128,8 @@ contract FlightSuretyApp {
      * @dev Add an airline to the registration queue
      *
      */
-    function registerAirline(address _airline, string calldata _name) external requireIsOperational requireNotRegisteredAirlineAddress(airline) returns (bool success, uint256 votes) {
-        currentRegisteredAirlineCount = flightSuretyData.getRegisteredAirlineCount();
+    function registerAirline(address _airline, string calldata _name) external requireIsOperational requireNotRegisteredAirlineAddress(_airline) returns (bool success, uint256 votes) {
+        uint256 currentRegisteredAirlineCount = flightSuretyData.getRegisteredAirlineCount();
         if (currentRegisteredAirlineCount < FLIGHT_NUMBER_REQUIREMENT_BEFORE_CONSENSUS) {
             flightSuretyData.registerAirline(_airline, _name);
         } else {
@@ -147,7 +154,10 @@ contract FlightSuretyApp {
      * @dev Called after oracle has updated flight status
      *
      */
-    function processFlightStatus(address airline, string memory flight, uint256 timestamp, uint8 statusCode) internal pure {
+    function processFlightStatus(address _airline, string memory _flight, uint256 _timestamp, uint8 _statusCode) internal requireIsOperational requireRegisteredFlight(_airline, _flight, _timestamp) {
+        bytes32 flightKey = getFlightKey(_airline, _flight, _timestamp);
+        flightSuretyData.registeredFlights[flightKey].statusCode = _statusCode;
+        emit eventFlightStatusUpdated(_airline, _flight, _timestamp, _statusCode);
     }
 
 
