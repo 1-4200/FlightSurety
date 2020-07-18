@@ -155,7 +155,7 @@ contract FlightSuretyApp {
                 flightRegistrationConsensusApprovedBy = new address[](0);
             }
         }
-        if (register == true) {
+        if (success == true) {
             flightSuretyData.registerAirline(_airline, _name);
             emit eventAirlineRegistered(_airline);
         }
