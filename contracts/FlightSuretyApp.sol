@@ -42,10 +42,12 @@ contract FlightSuretyApp {
 
     mapping(bytes32 => Flight) private flights;
 
+    address[] flightRegistrationConsensusApprovedBy = new address[](0);
+
     /********************************************************************************************/
     /*                                       EVENT DEFINITIONS                                  */
     /********************************************************************************************/
-    event eventAirlineRegistered(address airline);
+    event eventAirlineRegistered(address _airline);
     event eventFlightRegistered(address _airline, string _name, uint256 _timestamp);
     event eventFlightStatusUpdated(address _airline, string _name, uint256 _timestamp, uint8 _statusCode);
 
@@ -74,6 +76,18 @@ contract FlightSuretyApp {
     modifier requireContractOwner()
     {
         require(msg.sender == contractOwner, "Caller is not contract owner");
+        _;
+    }
+
+    modifier requireNotApprovedBySender(address _sentAddress) {
+        bool alreadyApproved = false;
+        uint consensusCount = flightRegistrationConsensusApprovedBy.length;
+        for (uint i = 0; i < consensusCount; i++) {
+            if (flightRegistrationConsensusApprovedBy[i] == _sentAddress) {
+                alreadyApproved == true;
+            }
+        }
+        require(alreadyApproved == false, "Sender is already approved");
         _;
     }
 
@@ -128,14 +142,23 @@ contract FlightSuretyApp {
      * @dev Add an airline to the registration queue
      *
      */
-    function registerAirline(address _airline, string calldata _name) external requireIsOperational requireNotRegisteredAirlineAddress(_airline) returns (bool success, uint256 votes) {
+    function registerAirline(address _airline, string calldata _name) external requireIsOperational requireNotRegisteredAirlineAddress(_airline) requireNotApprovedBySender(msg.sender) {
+        bool success = true;
         uint256 currentRegisteredAirlineCount = flightSuretyData.getRegisteredAirlineCount();
-        if (currentRegisteredAirlineCount < FLIGHT_NUMBER_REQUIREMENT_BEFORE_CONSENSUS) {
-            flightSuretyData.registerAirline(_airline, _name);
-        } else {
-
+        if (currentRegisteredAirlineCount >= FLIGHT_NUMBER_REQUIREMENT_BEFORE_CONSENSUS) {
+            success = false;
+            flightRegistrationConsensusApprovedBy.push(msg.sender);
+            uint consensusCount = flightRegistrationConsensusApprovedBy.length;
+            uint requirementCount = currentRegisteredAirlineCount.div(2);
+            if (consensusCount >= requirementCount) {
+                success = true;
+                flightRegistrationConsensusApprovedBy = new address[](0);
+            }
         }
-        return (success, 0);
+        if (register == true) {
+            flightSuretyData.registerAirline(_airline, _name);
+            emit eventAirlineRegistered(_airline);
+        }
     }
 
 
