@@ -45,6 +45,8 @@ contract FlightSuretyData {
     /*                                       EVENT DEFINITIONS                                  */
     /********************************************************************************************/
     event eventAirlineRegistered(address airline);
+    event eventFlightRegistered(address _airline, string _name, uint256 _timestamp);
+    event eventFlightStatusUpdated(bytes32 _flightKey, uint8 _statusCode);
     event eventInsurancePurchased(bytes32 flightKey, address passender, uint256 amount, uint256 multiplier);
     event eventInsuranceRefunded(bytes32 flightKey, address passender, uint256 refund);
 
@@ -82,29 +84,38 @@ contract FlightSuretyData {
         _;
     }
 
-    modifier requireNot0xAddress(address sentAddress) {
-        require(sentAddress != address(0), "Invalid address");
+    modifier requireNot0xAddress(address _airline) {
+        require(_airline != address(0), "Invalid address");
         _;
     }
 
-    modifier requireNotRegisteredAirlineAddress(address sentAddress) {
-        require(registeredAirlines[sentAddress].isRegistered == false, "Airline is already registered");
+    modifier requireNotRegisteredAirlineAddress(address _airline) {
+        require(isAirlineRegistered(_airline) == false, "Airline is already registered");
         _;
     }
 
-    modifier requireRegisteredAirlineAddress(address sentAddress) {
-        require(registeredAirlines[sentAddress].isRegistered == true, "Airline is not registered");
+    modifier requireRegisteredAirlineAddress(address _airline) {
+        require(isAirlineRegistered(_airline) == true, "Airline is not registered");
         _;
     }
 
-    modifier requireRegisteredFlight(bytes32 flightKey) {
-        require(registeredFlights[flightKey].isRegistered == true, "Flight is not registered");
+    modifier requireRegisteredFlight(bytes32 _flightKey) {
+        require(isFlightRegistered(_flightKey) == true, "Flight is not registered");
         _;
     }
 
     /********************************************************************************************/
     /*                                       UTILITY FUNCTIONS                                  */
     /********************************************************************************************/
+
+    function isAirlineRegistered(address _airline) public view returns (bool) {
+        return registeredAirlines[_airline].isRegistered;
+    }
+
+    function isFlightRegistered(bytes32 _flightKey) public view returns (bool) {
+        return registeredFlights[_flightKey].isRegistered;
+    }
+
 
     /**
     * @dev Get operating status of contract
@@ -129,7 +140,7 @@ contract FlightSuretyData {
     /*                                     SMART CONTRACT FUNCTIONS                             */
     /********************************************************************************************/
 
-    function getRegisteredAirlineCount() external view returns(uint256) {
+    function getRegisteredAirlineCount() external view returns (uint256) {
         return airlines.length;
     }
 
@@ -144,6 +155,21 @@ contract FlightSuretyData {
         emit eventAirlineRegistered(airline);
     }
 
+    function registerFlight(address _airline, string calldata _flight, uint256 _timestamp) external requireContractOwner requireIsOperational requireNot0xAddress(_airline) {
+        bytes32 flightKey = getFlightKey(_airline, _flight, _timestamp);
+        registeredFlights[flightKey].name = _flight;
+        registeredFlights[flightKey].isRegistered = true;
+        registeredFlights[flightKey].updatedTimestamp = _timestamp;
+        registeredFlights[flightKey].airline = _airline;
+
+        flights.push(flightKey);
+        emit eventFlightRegistered(_airline, _flight, _timestamp);
+    }
+
+    function setFlightStatus(bytes32 _flightKey, uint8 _statusCode) external requireContractOwner requireIsOperational {
+        registeredFlights[_flightKey].statusCode = _statusCode;
+        emit eventFlightStatusUpdated(_flightKey, _statusCode);
+    }
 
     /**
      * @dev Buy insurance for a flight

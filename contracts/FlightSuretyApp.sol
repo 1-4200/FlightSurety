@@ -48,8 +48,6 @@ contract FlightSuretyApp {
     /*                                       EVENT DEFINITIONS                                  */
     /********************************************************************************************/
     event eventAirlineRegistered(address _airline);
-    event eventFlightRegistered(address _airline, string _name, uint256 _timestamp);
-    event eventFlightStatusUpdated(address _airline, string _name, uint256 _timestamp, uint8 _statusCode);
 
     /********************************************************************************************/
     /*                                       FUNCTION MODIFIERS                                 */
@@ -79,11 +77,11 @@ contract FlightSuretyApp {
         _;
     }
 
-    modifier requireNotApprovedBySender(address _sentAddress) {
+    modifier requireNotApprovedBySender(address _sender) {
         bool alreadyApproved = false;
         uint consensusCount = flightRegistrationConsensusApprovedBy.length;
         for (uint i = 0; i < consensusCount; i++) {
-            if (flightRegistrationConsensusApprovedBy[i] == _sentAddress) {
+            if (flightRegistrationConsensusApprovedBy[i] == _sender) {
                 alreadyApproved == true;
             }
         }
@@ -91,20 +89,20 @@ contract FlightSuretyApp {
         _;
     }
 
-    modifier requireNotRegisteredAirlineAddress(address _sentAddress) {
-        require(flightSuretyData.registeredAirlines[_sentAddress].isRegistered == false, "Airline is already registered");
+    modifier requireNotRegisteredAirlineAddress(address _airline) {
+        require(flightSuretyData.isAirlineRegistered(_airline) == false, "Airline is already registered");
         _;
     }
 
-    modifier requireNotRegisteredFlight(address _sentAddress, string memory _name, uint256 _timestamp) {
-        bytes32 flightKey = getFlightKey(_sentAddress, _name, _timestamp);
-        require(flightSuretyData.Flight[flightKey].isRegistered == false, "Flight is already registered");
+    modifier requireNotRegisteredFlight(address _airline, string memory _name, uint256 _timestamp) {
+        bytes32 flightKey = getFlightKey(_airline, _name, _timestamp);
+        require(flightSuretyData.isFlightRegistered(flightKey) == false, "Flight is already registered");
         _;
     }
 
-    modifier requireRegisteredFlight(address _sentAddress, string memory _name, uint256 _timestamp) {
-        bytes32 flightKey = getFlightKey(_sentAddress, _name, _timestamp);
-        require(flightSuretyData.Flight[flightKey].isRegistered == true, "Flight is not registered");
+    modifier requireRegisteredFlight(address _airline, string memory _name, uint256 _timestamp) {
+        bytes32 flightKey = getFlightKey(_airline, _name, _timestamp);
+        require(flightSuretyData.isFlightRegistered(flightKey) == true, "Flight is not registered");
         _;
     }
 
@@ -116,7 +114,7 @@ contract FlightSuretyApp {
     * @dev Contract constructor
     *
     */
-    constructor(address _doa) public {
+    constructor(address payable _doa) public {
         contractOwner = msg.sender;
         flightSuretyData = FlightSuretyData(_doa);
     }
@@ -166,11 +164,8 @@ contract FlightSuretyApp {
      * @dev Register a future flight for insuring.
      *
      */
-    function registerFlight(address _airline, string calldata _name, uint256 _timestamp) external requireIsOperational requireNotRegisteredFlight(_airline, _name, _timestamp) {
-        bytes32 flightKey = getFlightKey(_airline, _name, _timestamp);
-        flightSuretyData.registeredFlights[flightKey] = flightSuretyData.Flight({name : _name, isRegistered : true, statusCode : STATUS_CODE_UNKNOWN, updatedTimestamp : _timestamp, airline : _airline, insurances : address(0)[]});
-        flightSuretyData.flights.push(flightKey);
-        emit eventFlightRegistered(_airline, _name, _timestamp);
+    function registerFlight(address _airline, string calldata _flight, uint256 _timestamp) external requireIsOperational requireNotRegisteredFlight(_airline, _flight, _timestamp) {
+        flightSuretyData.registerFlight(_airline, _flight, _timestamp);
     }
 
     /**
@@ -179,8 +174,7 @@ contract FlightSuretyApp {
      */
     function processFlightStatus(address _airline, string memory _flight, uint256 _timestamp, uint8 _statusCode) internal requireIsOperational requireRegisteredFlight(_airline, _flight, _timestamp) {
         bytes32 flightKey = getFlightKey(_airline, _flight, _timestamp);
-        flightSuretyData.registeredFlights[flightKey].statusCode = _statusCode;
-        emit eventFlightStatusUpdated(_airline, _flight, _timestamp, _statusCode);
+        flightSuretyData.setFlightStatus(flightKey, _statusCode);
     }
 
 
@@ -326,16 +320,30 @@ contract FlightSuretyApp {
     }
 }
 
-// endregion
 // FlightSuretyContract interface
 interface FlightSuretyData {
     // UTILITY FUNCTIONS
-    //    function isOperational() public view returns (bool);
-    //    function setOperatingStatus(bool mode) external;
+    function isAirlineRegistered(address _airline) external view returns (bool);
+
+    function isFlightRegistered(bytes32 _flightKey) external view returns (bool);
+
+    function isOperational() external view returns (bool);
+
+    function isAirline(address candidateAirline) external view returns (bool);
 
     // SMART CONTRACT FUNCTIONS
-    //    function registerAirline(address airline, string calldata name) external;
-    //    function buy(address airline, string calldata flight, uint256 timestamp, uint256 multiplier) external payable;
-    //    function creditInsurees(bytes32 flightKey) external;
-    //    function pay(address payable passenger) external;
+    function getRegisteredAirlineCount() external view returns (uint256);
+
+    function registerAirline(address _airline, string calldata _name) external returns (bool success, uint256 votes);
+
+    function registerFlight(address _airline, string calldata _flight, uint256 _timestamp) external;
+
+    function setFlightStatus(bytes32 flightKey, uint8 statusCode) external;
+
+    function creditInsuree(address passenger, address airline, string calldata flight, uint256 departureTimestamp) external returns (bool);
+
+    function depositAirlineFee(address airline) external payable returns (bool);
+
+fallback() external payable;
+
 }
