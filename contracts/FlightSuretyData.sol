@@ -11,6 +11,7 @@ contract FlightSuretyData {
 
     address private contractOwner;                                      // Account used to deploy contract
     bool private operational = true;                                    // Blocks all state changes throughout the contract if false
+    mapping(address => bool) private authorizedContracts;
 
     struct Airline {
         string name;
@@ -84,8 +85,13 @@ contract FlightSuretyData {
         _;
     }
 
-    modifier requireNot0xAddress(address _airline) {
-        require(_airline != address(0), "Invalid address");
+    modifier isCallerAuthorized() {
+        require(authorizedContracts[msg.sender], 'Caller is not authorized app contract');
+        _;
+    }
+
+    modifier requireNot0xAddress(address _sender) {
+        require(_sender != address(0), "Invalid address");
         _;
     }
 
@@ -104,9 +110,22 @@ contract FlightSuretyData {
         _;
     }
 
+    modifier requireMinimumFund(uint _value) {
+        require(_value >= 10 ether, "Fund is not enough, must be more than 10 ether");
+        _;
+    }
+
     /********************************************************************************************/
     /*                                       UTILITY FUNCTIONS                                  */
     /********************************************************************************************/
+
+    function authorizeCaller(address _doa) external requireContractOwner requireNot0xAddress(_doa) {
+        authorizedContracts[_doa] = true;
+    }
+
+    function deauthorizeCaller(address _doa) external requireContractOwner requireNot0xAddress(_doa) {
+        authorizedContracts[_doa] = false;
+    }
 
     function isAirlineRegistered(address _airline) public view returns (bool) {
         return registeredAirlines[_airline].isRegistered;
@@ -149,13 +168,13 @@ contract FlightSuretyData {
      *      Can only be called from FlightSuretyApp contract
      *
      */
-    function registerAirline(address airline, string calldata name) external requireContractOwner requireIsOperational requireNot0xAddress(airline) requireNotRegisteredAirlineAddress(airline) {
+    function registerAirline(address airline, string calldata name) external requireContractOwner requireIsOperational isCallerAuthorized requireNot0xAddress(airline) requireNotRegisteredAirlineAddress(airline) {
         registeredAirlines[airline] = Airline({name : name, isRegistered : true, isFunded : false});
         airlines.push(airline);
         emit eventAirlineRegistered(airline);
     }
 
-    function registerFlight(address _airline, string calldata _flight, uint256 _timestamp) external requireContractOwner requireIsOperational requireNot0xAddress(_airline) {
+    function registerFlight(address _airline, string calldata _flight, uint256 _timestamp) external requireContractOwner requireIsOperational isCallerAuthorized requireNot0xAddress(_airline) {
         bytes32 flightKey = getFlightKey(_airline, _flight, _timestamp);
         registeredFlights[flightKey].name = _flight;
         registeredFlights[flightKey].isRegistered = true;
@@ -166,7 +185,7 @@ contract FlightSuretyData {
         emit eventFlightRegistered(_airline, _flight, _timestamp);
     }
 
-    function setFlightStatus(bytes32 _flightKey, uint8 _statusCode) external requireContractOwner requireIsOperational {
+    function setFlightStatus(bytes32 _flightKey, uint8 _statusCode) external requireContractOwner isCallerAuthorized requireIsOperational {
         registeredFlights[_flightKey].statusCode = _statusCode;
         emit eventFlightStatusUpdated(_flightKey, _statusCode);
     }
@@ -212,7 +231,7 @@ contract FlightSuretyData {
      *      resulting in insurance payouts, the contract should be self-sustaining
      *
      */
-    function fund(address airline) public payable {
+    function fund(address airline) public payable requireMinimumFund(msg.value) {
         registeredAirlines[airline].isFunded = true;
     }
 

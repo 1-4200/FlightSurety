@@ -33,15 +33,6 @@ contract FlightSuretyApp {
     // Registration of fifth and subsequent airlines requires multi-party consensus of 50% of registered airlines
     uint8 private constant FLIGHT_NUMBER_REQUIREMENT_BEFORE_CONSENSUS = 4;
 
-    struct Flight {
-        bool isRegistered;
-        uint8 statusCode;
-        uint256 updatedTimestamp;
-        address airline;
-    }
-
-    mapping(bytes32 => Flight) private flights;
-
     address[] flightRegistrationConsensusApprovedBy = new address[](0);
 
     /********************************************************************************************/
