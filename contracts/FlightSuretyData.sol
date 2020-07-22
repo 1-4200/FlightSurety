@@ -11,7 +11,7 @@ contract FlightSuretyData {
 
     address private contractOwner;                                      // Account used to deploy contract
     bool private operational = true;                                    // Blocks all state changes throughout the contract if false
-    uint256 private contractBalances = 0;
+    uint256 private contractBalances = 0 ether;
     mapping(address => bool) private authorizedContracts;
 
     struct Airline {
@@ -19,6 +19,7 @@ contract FlightSuretyData {
         bool isRegistered;
         bool isFunded;
     }
+
     mapping(address => Airline) private registeredAirlines;
     address[] airlines;
 
@@ -55,10 +56,8 @@ contract FlightSuretyData {
     * @dev Constructor
     *      The deploying account becomes contractOwner
     */
-    constructor(string memory airlineName) public payable {
+    constructor() public payable {
         contractOwner = msg.sender;
-        registerAirline(msg.sender, airlineName);
-        fund(msg.sender);
     }
 
     /********************************************************************************************/
@@ -170,7 +169,7 @@ contract FlightSuretyData {
      *      Can only be called from FlightSuretyApp contract
      *
      */
-    function registerAirline(address airline, string memory name) public requireContractOwner requireIsOperational isCallerAuthorized requireNot0xAddress(airline) requireNotRegisteredAirlineAddress(airline) {
+    function registerAirline(address airline, string calldata name) public requireContractOwner requireIsOperational isCallerAuthorized requireNot0xAddress(airline) requireNotRegisteredAirlineAddress(airline) {
         registeredAirlines[airline] = Airline({name : name, isRegistered : true, isFunded : false});
         airlines.push(airline);
         emit eventAirlineRegistered(airline);
@@ -233,8 +232,8 @@ contract FlightSuretyData {
      *      resulting in insurance payouts, the contract should be self-sustaining
      *
      */
-    function fund(address airline) public payable requireMinimumFund(msg.value) {
-        registeredAirlines[airline].isFunded = true;
+    function fund(address _airline) public payable requireMinimumFund(msg.value) {
+        registeredAirlines[_airline].isFunded = true;
         contractBalances.add(msg.value);
     }
 

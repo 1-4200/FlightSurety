@@ -1,10 +1,12 @@
-
 var FlightSuretyApp = artifacts.require("FlightSuretyApp");
 var FlightSuretyData = artifacts.require("FlightSuretyData");
 var BigNumber = require('bignumber.js');
+var Web3 = require('web3');
 
-var Config = async function(accounts) {
-    
+let web3 = new Web3(new Web3.providers.WebsocketProvider('ws://127.0.0.1:7545'));
+
+var Config = async function (accounts) {
+
     // These test addresses are useful when you need to add
     // multiple users in test scripts
     let testAddresses = [
@@ -23,10 +25,10 @@ var Config = async function(accounts) {
     let owner = accounts[0];
     let firstAirline = accounts[1];
 
-    let flightSuretyData = await FlightSuretyData.new();
-    let flightSuretyApp = await FlightSuretyApp.new();
+    // let flightSuretyData = await FlightSuretyData.new({value: web3.utils.toWei('10', 'ether'), from: owner});
+    let flightSuretyData = await FlightSuretyData.new({from: owner});
+    let flightSuretyApp = await FlightSuretyApp.new(flightSuretyData.address, {from: owner});
 
-    
     return {
         owner: owner,
         firstAirline: firstAirline,
