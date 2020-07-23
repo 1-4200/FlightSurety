@@ -320,7 +320,7 @@ interface FlightSuretyData {
 
     function isOperational() external view returns (bool);
 
-    function isAirline(address candidateAirline) external view returns (bool);
+    function isAirline(address _airline) external view returns (bool);
 
     // SMART CONTRACT FUNCTIONS
     function getRegisteredAirlineCount() external view returns (uint256);

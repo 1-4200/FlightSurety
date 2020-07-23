@@ -67,10 +67,11 @@ contract('Flight Surety Tests', async (accounts) => {
 
         // ARRANGE
         let newAirline = accounts[2];
+        let newAirlineName = "test";
 
         // ACT
         try {
-            await config.flightSuretyApp.registerAirline(newAirline, {from: config.firstAirline});
+            await config.flightSuretyApp.registerAirline(newAirline, newAirlineName, {from: config.firstAirline});
         } catch (e) {
 
         }

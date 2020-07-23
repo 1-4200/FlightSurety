@@ -146,6 +146,9 @@ contract FlightSuretyData {
         return operational;
     }
 
+    function isAirline(address _airline) external view returns (bool) {
+        return registeredAirlines[_airline].isRegistered;
+    }
 
     /**
     * @dev Sets contract operations on/off
