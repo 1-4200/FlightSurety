@@ -24,19 +24,18 @@ var Config = async function (accounts) {
 
     let owner = accounts[0];
     let firstAirline = accounts[1];
-    let firstAirlineName = "test airline";
 
-    // let flightSuretyData = await FlightSuretyData.new({value: web3.utils.toWei('10', 'ether'), from: owner});
-    let flightSuretyData = await FlightSuretyData.new({from: owner});
-    let flightSuretyApp = await FlightSuretyApp.new(flightSuretyData.address, firstAirlineName, {
+    let flightSuretyData = await FlightSuretyData.new({
         value: web3.utils.toWei('10', 'ether'),
+        from: owner
+    });
+    let flightSuretyApp = await FlightSuretyApp.new(flightSuretyData.address, {
         from: owner
     });
 
     return {
         owner: owner,
         firstAirline: firstAirline,
-        firstAirlineName: firstAirlineName,
         weiMultiple: (new BigNumber(10)).pow(18),
         testAddresses: testAddresses,
         flightSuretyData: flightSuretyData,

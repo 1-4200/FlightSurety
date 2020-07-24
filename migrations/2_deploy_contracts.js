@@ -2,19 +2,16 @@ const FlightSuretyApp = artifacts.require("FlightSuretyApp");
 const FlightSuretyData = artifacts.require("FlightSuretyData");
 const fs = require('fs');
 const BigNumber = require('bignumber.js');
-const weiMultiple = (new BigNumber(10)).pow(18);
-
-let firstAirline = '0xf17f52151EbEF6C7334FAD080c5704D77216b732';
-let firstAirlineName = 'Test Airline';
-let fund = 10 * weiMultiple;
+const Web3 = require('web3');
 
 module.exports = function (deployer, network, accounts) {
     if (network === "develop") {
+        let web3 = new Web3(new Web3.providers.WebsocketProvider('ws://127.0.0.1:7545'));
+        let fund = web3.utils.toWei('10', 'ether')
         let owner = accounts[0];
-        
-        deployer.deploy(FlightSuretyData, {from: owner, value: fund.toString()})
+        deployer.deploy(FlightSuretyData, {from: owner, value: fund})
             .then(() => {
-                return deployer.deploy(FlightSuretyApp, FlightSuretyData.address, firstAirlineName, {from: owner})
+                return deployer.deploy(FlightSuretyApp, FlightSuretyData.address, {from: owner})
                     .then(() => {
                         let config = {
                             localhost: {

@@ -105,11 +105,9 @@ contract FlightSuretyApp {
     * @dev Contract constructor
     *
     */
-    constructor(address payable _doa, string memory _firstAirlineName) public {
+    constructor(address payable _doa) public {
         contractOwner = msg.sender;
         flightSuretyData = FlightSuretyData(_doa);
-        flightSuretyData.registerAirline(msg.sender, _firstAirlineName);
-        flightSuretyData.fund(msg.sender);
     }
 
     /********************************************************************************************/
@@ -133,7 +131,7 @@ contract FlightSuretyApp {
      * @dev Add an airline to the registration queue
      *
      */
-    function registerAirline(address _airline, string calldata _name) external requireIsOperational requireNotRegisteredAirlineAddress(_airline) requireNotApprovedBySender(msg.sender) {
+    function registerAirline(address _airline) external requireIsOperational requireNotRegisteredAirlineAddress(_airline) requireNotApprovedBySender(msg.sender) {
         bool success = true;
         uint256 currentRegisteredAirlineCount = flightSuretyData.getRegisteredAirlineCount();
         if (currentRegisteredAirlineCount >= FLIGHT_NUMBER_REQUIREMENT_BEFORE_CONSENSUS) {
@@ -147,7 +145,7 @@ contract FlightSuretyApp {
             }
         }
         if (success == true) {
-            flightSuretyData.registerAirline(_airline, _name);
+            flightSuretyData.registerAirline(_airline);
             emit eventAirlineRegistered(_airline);
         }
     }
@@ -327,7 +325,7 @@ interface FlightSuretyData {
     // SMART CONTRACT FUNCTIONS
     function getRegisteredAirlineCount() external view returns (uint256);
 
-    function registerAirline(address _airline, string calldata _name) external returns (bool success, uint256 votes);
+    function registerAirline(address _airline) external returns (bool success, uint256 votes);
 
     function registerFlight(address _airline, string calldata _flight, uint256 _timestamp) external;
 
@@ -337,8 +335,6 @@ interface FlightSuretyData {
 
     function depositAirlineFee(address airline) external payable returns (bool);
 
-    function fund(address _airline) external payable;
-
-fallback() external payable;
+    fallback() external payable;
 
 }

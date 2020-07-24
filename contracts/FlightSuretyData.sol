@@ -15,7 +15,6 @@ contract FlightSuretyData {
     mapping(address => bool) private authorizedContracts;
 
     struct Airline {
-        string name;
         bool isRegistered;
         bool isFunded;
     }
@@ -58,6 +57,8 @@ contract FlightSuretyData {
     */
     constructor() public payable {
         contractOwner = msg.sender;
+        registerFirstAirline(msg.sender);
+        fund(msg.sender);
     }
 
     /********************************************************************************************/
@@ -167,13 +168,19 @@ contract FlightSuretyData {
         return airlines.length;
     }
 
+    function registerFirstAirline(address airline) internal requireContractOwner requireIsOperational requireNot0xAddress(airline) {
+        registeredAirlines[airline] = Airline({isRegistered : true, isFunded : false});
+        airlines.push(airline);
+        emit eventAirlineRegistered(airline);
+    }
+
     /**
      * @dev Add an airline to the registration queue
      *      Can only be called from FlightSuretyApp contract
      *
      */
-    function registerAirline(address airline, string calldata name) external requireContractOwner requireIsOperational isCallerAuthorized requireNot0xAddress(airline) requireNotRegisteredAirlineAddress(airline) {
-        registeredAirlines[airline] = Airline({name : name, isRegistered : true, isFunded : false});
+    function registerAirline(address airline) external requireContractOwner requireIsOperational isCallerAuthorized requireNot0xAddress(airline) requireNotRegisteredAirlineAddress(airline) {
+        registeredAirlines[airline] = Airline({isRegistered : true, isFunded : false});
         airlines.push(airline);
         emit eventAirlineRegistered(airline);
     }
@@ -235,12 +242,7 @@ contract FlightSuretyData {
      *      resulting in insurance payouts, the contract should be self-sustaining
      *
      */
-    function fund(address _airline) external payable requireMinimumFund(msg.value) {
-        registeredAirlines[_airline].isFunded = true;
-        contractBalances.add(msg.value);
-    }
-
-    function _fund(address _airline) public payable requireMinimumFund(msg.value) {
+    function fund(address _airline) public payable requireMinimumFund(msg.value) {
         registeredAirlines[_airline].isFunded = true;
         contractBalances.add(msg.value);
     }
@@ -254,7 +256,7 @@ contract FlightSuretyData {
 *
 */
 fallback() external payable {
-_fund(tx.origin);
+fund(tx.origin);
 }
 
 
