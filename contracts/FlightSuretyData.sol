@@ -172,7 +172,7 @@ contract FlightSuretyData {
      *      Can only be called from FlightSuretyApp contract
      *
      */
-    function registerAirline(address airline, string calldata name) public requireContractOwner requireIsOperational isCallerAuthorized requireNot0xAddress(airline) requireNotRegisteredAirlineAddress(airline) {
+    function registerAirline(address airline, string calldata name) external requireContractOwner requireIsOperational isCallerAuthorized requireNot0xAddress(airline) requireNotRegisteredAirlineAddress(airline) {
         registeredAirlines[airline] = Airline({name : name, isRegistered : true, isFunded : false});
         airlines.push(airline);
         emit eventAirlineRegistered(airline);
@@ -235,7 +235,12 @@ contract FlightSuretyData {
      *      resulting in insurance payouts, the contract should be self-sustaining
      *
      */
-    function fund(address _airline) public payable requireMinimumFund(msg.value) {
+    function fund(address _airline) external payable requireMinimumFund(msg.value) {
+        registeredAirlines[_airline].isFunded = true;
+        contractBalances.add(msg.value);
+    }
+
+    function _fund(address _airline) public payable requireMinimumFund(msg.value) {
         registeredAirlines[_airline].isFunded = true;
         contractBalances.add(msg.value);
     }
@@ -249,7 +254,7 @@ contract FlightSuretyData {
 *
 */
 fallback() external payable {
-fund(tx.origin);
+_fund(tx.origin);
 }
 
 

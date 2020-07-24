@@ -1,5 +1,6 @@
 var Test = require('../config/testConfig.js');
 var BigNumber = require('bignumber.js');
+
 contract('Flight Surety Tests', async (accounts) => {
 
     var config;
@@ -82,5 +83,9 @@ contract('Flight Surety Tests', async (accounts) => {
 
     });
 
+    it.only('first airline is registered when contract is deployed', async () => {
+        let registeredFlightCnt = await config.flightSuretyData.getRegisteredAirlineCount.call();
+        assert.equal(registeredFlightCnt, 1, "first airline is not registered when contract is deployed")
+    })
 
 });

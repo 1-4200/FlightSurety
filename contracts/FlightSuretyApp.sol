@@ -105,9 +105,11 @@ contract FlightSuretyApp {
     * @dev Contract constructor
     *
     */
-    constructor(address payable _doa) public {
+    constructor(address payable _doa, string memory _firstAirlineName) public {
         contractOwner = msg.sender;
         flightSuretyData = FlightSuretyData(_doa);
+        flightSuretyData.registerAirline(msg.sender, _firstAirlineName);
+        flightSuretyData.fund(msg.sender);
     }
 
     /********************************************************************************************/
@@ -334,6 +336,8 @@ interface FlightSuretyData {
     function creditInsuree(address passenger, address airline, string calldata flight, uint256 departureTimestamp) external returns (bool);
 
     function depositAirlineFee(address airline) external payable returns (bool);
+
+    function fund(address _airline) external payable;
 
 fallback() external payable;
 
