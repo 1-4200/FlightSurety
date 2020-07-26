@@ -11,12 +11,12 @@ contract FlightSuretyData {
 
     address private contractOwner;                                      // Account used to deploy contract
     bool private operational = true;                                    // Blocks all state changes throughout the contract if false
-    uint256 private contractBalances = 0 ether;
     mapping(address => bool) private authorizedContracts;
 
     struct Airline {
         bool isRegistered;
         bool isFunded;
+        uint256 deposit;
     }
 
     mapping(address => Airline) private registeredAirlines;
@@ -83,12 +83,12 @@ contract FlightSuretyData {
     * @dev Modifier that requires the "ContractOwner" account to be the function caller
     */
     modifier requireContractOwner() {
-        require(msg.sender == contractOwner, "Caller is not contract owner");
+        require(msg.sender == contractOwner, "Caller is not data contract owner");
         _;
     }
 
     modifier isCallerAuthorized() {
-        require(authorizedContracts[msg.sender], 'Caller is not authorized app contract');
+        require(authorizedContracts[msg.sender] == true, 'Caller is not authorized app contract');
         _;
     }
 
@@ -169,7 +169,7 @@ contract FlightSuretyData {
     }
 
     function registerFirstAirline(address airline) internal requireContractOwner requireIsOperational requireNot0xAddress(airline) {
-        registeredAirlines[airline] = Airline({isRegistered : true, isFunded : false});
+        registeredAirlines[airline] = Airline({isRegistered : true, isFunded : false, deposit : 0});
         airlines.push(airline);
         emit eventAirlineRegistered(airline);
     }
@@ -180,7 +180,7 @@ contract FlightSuretyData {
      *
      */
     function registerAirline(address airline) external requireContractOwner requireIsOperational isCallerAuthorized requireNot0xAddress(airline) requireNotRegisteredAirlineAddress(airline) {
-        registeredAirlines[airline] = Airline({isRegistered : true, isFunded : false});
+        registeredAirlines[airline] = Airline({isRegistered : true, isFunded : false, deposit : 0});
         airlines.push(airline);
         emit eventAirlineRegistered(airline);
     }
@@ -244,7 +244,7 @@ contract FlightSuretyData {
      */
     function fund(address _airline) public payable requireMinimumFund(msg.value) {
         registeredAirlines[_airline].isFunded = true;
-        contractBalances.add(msg.value);
+        registeredAirlines[_airline].deposit.add(msg.value);
     }
 
     function getFlightKey(address airline, string memory flight, uint256 timestamp) pure internal returns (bytes32) {

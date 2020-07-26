@@ -333,8 +333,6 @@ interface FlightSuretyData {
 
     function creditInsuree(address passenger, address airline, string calldata flight, uint256 departureTimestamp) external returns (bool);
 
-    function depositAirlineFee(address airline) external payable returns (bool);
-
     fallback() external payable;
 
 }
