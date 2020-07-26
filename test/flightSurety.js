@@ -72,7 +72,7 @@ contract('Flight Surety Tests', async (accounts) => {
 
         // ACT
         try {
-            await config.flightSuretyApp.registerAirline(newAirline, newAirlineName, {from: config.firstAirline});
+            await config.flightSuretyApp.registerAirline(newAirline, newAirlineName, {from: config.secondAirline});
         } catch (e) {
 
         }
@@ -84,19 +84,22 @@ contract('Flight Surety Tests', async (accounts) => {
     });
 
     it('first airline is registered when contract is deployed', async () => {
-        const registeredFlightCnt = await config.flightSuretyData.getRegisteredAirlineCount.call();
+        const registeredFlightCnt = await config.flightSuretyData.getRegisteredAirlineCount.call({from: config.owner});
         assert.equal(registeredFlightCnt, 1, "first airline is not registered when contract is deployed")
 
-        const registeredAirline = await config.flightSuretyData.isAirline(config.owner);
+        const registeredAirline = await config.flightSuretyData.isAirline.call(config.owner, {from: config.owner});
         assert.equal(registeredAirline, true, "first airline is not registered when contract is deployed")
     });
 
     it('Only existing airline may register a new airline until there are at least four airlines registered', async () => {
-        // await config.flightSuretyApp.registerAirline(config.firstAirline, {from: config.owner});
-        // await config.flightSuretyApp.registerAirline(config.secondAirline, {from: config.owner});
-        // await config.flightSuretyApp.registerAirline(config.thirdAirline, {from: config.owner});
-        // const registeredFlightCnt = await config.flightSuretyData.getRegisteredAirlineCount.call();
-        // assert.equal(registeredFlightCnt, 4, "Only existing airline may register a new airline until there are at least four airlines registered")
+        await config.flightSuretyApp.registerAirline(config.secondAirline, {from: config.owner});
+        const registeredAirline = await config.flightSuretyData.isAirline.call(config.secondAirline, {from: config.owner});
+        assert.equal(registeredAirline, true, "second airline is not registered")
+
+        await config.flightSuretyApp.registerAirline(config.thirdAirline, {from: config.owner});
+        await config.flightSuretyApp.registerAirline(config.forthAirline, {from: config.owner});
+        const registeredFlightCnt = await config.flightSuretyData.getRegisteredAirlineCount.call({from: config.owner});
+        assert.equal(registeredFlightCnt, 4, "Only existing airline may register a new airline until there are at least four airlines registered")
     });
 
     it('Registration of fifth and subsequent airlines requires multi-party consensus of 50% of registered airlines', async () => {

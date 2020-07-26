@@ -74,6 +74,7 @@ contract FlightSuretyApp {
         for (uint i = 0; i < consensusCount; i++) {
             if (flightRegistrationConsensusApprovedBy[i] == _sender) {
                 alreadyApproved == true;
+                break;
             }
         }
         require(alreadyApproved == false, "Sender is already approved");
@@ -325,7 +326,7 @@ interface FlightSuretyData {
     // SMART CONTRACT FUNCTIONS
     function getRegisteredAirlineCount() external view returns (uint256);
 
-    function registerAirline(address _airline) external returns (bool success, uint256 votes);
+    function registerAirline(address _airline) external;
 
     function registerFlight(address _airline, string calldata _flight, uint256 _timestamp) external;
 

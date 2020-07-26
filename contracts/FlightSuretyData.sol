@@ -168,7 +168,7 @@ contract FlightSuretyData {
         return airlines.length;
     }
 
-    function registerFirstAirline(address airline) internal requireContractOwner requireIsOperational requireNot0xAddress(airline) {
+    function registerFirstAirline(address airline) internal requireIsOperational requireNot0xAddress(airline) {
         registeredAirlines[airline] = Airline({isRegistered : true, isFunded : false, deposit : 0});
         airlines.push(airline);
         emit eventAirlineRegistered(airline);
@@ -179,13 +179,13 @@ contract FlightSuretyData {
      *      Can only be called from FlightSuretyApp contract
      *
      */
-    function registerAirline(address airline) external requireContractOwner requireIsOperational isCallerAuthorized requireNot0xAddress(airline) requireNotRegisteredAirlineAddress(airline) {
-        registeredAirlines[airline] = Airline({isRegistered : true, isFunded : false, deposit : 0});
-        airlines.push(airline);
-        emit eventAirlineRegistered(airline);
+    function registerAirline(address _airline) external requireIsOperational isCallerAuthorized requireNot0xAddress(_airline) requireNotRegisteredAirlineAddress(_airline) {
+        registeredAirlines[_airline] = Airline({isRegistered : true, isFunded : false, deposit : 0});
+        airlines.push(_airline);
+        emit eventAirlineRegistered(_airline);
     }
 
-    function registerFlight(address _airline, string calldata _flight, uint256 _timestamp) external requireContractOwner requireIsOperational isCallerAuthorized requireNot0xAddress(_airline) {
+    function registerFlight(address _airline, string calldata _flight, uint256 _timestamp) external requireIsOperational isCallerAuthorized requireNot0xAddress(_airline) {
         bytes32 flightKey = getFlightKey(_airline, _flight, _timestamp);
         registeredFlights[flightKey].name = _flight;
         registeredFlights[flightKey].isRegistered = true;
@@ -196,7 +196,7 @@ contract FlightSuretyData {
         emit eventFlightRegistered(_airline, _flight, _timestamp);
     }
 
-    function setFlightStatus(bytes32 _flightKey, uint8 _statusCode) external requireContractOwner isCallerAuthorized requireIsOperational {
+    function setFlightStatus(bytes32 _flightKey, uint8 _statusCode) external isCallerAuthorized requireIsOperational {
         registeredFlights[_flightKey].statusCode = _statusCode;
         emit eventFlightStatusUpdated(_flightKey, _statusCode);
     }
