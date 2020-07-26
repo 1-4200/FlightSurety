@@ -86,6 +86,15 @@ contract('Flight Surety Tests', async (accounts) => {
     it.only('first airline is registered when contract is deployed', async () => {
         let registeredFlightCnt = await config.flightSuretyData.getRegisteredAirlineCount.call();
         assert.equal(registeredFlightCnt, 1, "first airline is not registered when contract is deployed")
-    })
+
+        let registeredAirline = await config.flightSuretyData.isAirline(config.owner);
+        assert.equal(registeredAirline, true, "first airline is not registered when contract is deployed")
+    });
+
+    // it('Only existing airline may register a new airline until there are at least four airlines registered', async () => {
+    //     let fee = await config.flightSuretyApp.FLIGHT_NUMBER_REQUIREMENT_BEFORE_CONSENSUS.call();
+    //     let ownerAirlineIsRegistered = await config.flightSuretyData.isRegistered.call(ownerAirline);
+    //     config.flightSuretyApp.registerAirline(config.firstAirline, {from: config.owner});
+    // });
 
 });
