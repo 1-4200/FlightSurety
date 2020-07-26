@@ -83,18 +83,39 @@ contract('Flight Surety Tests', async (accounts) => {
 
     });
 
-    it.only('first airline is registered when contract is deployed', async () => {
-        let registeredFlightCnt = await config.flightSuretyData.getRegisteredAirlineCount.call();
+    it('first airline is registered when contract is deployed', async () => {
+        const registeredFlightCnt = await config.flightSuretyData.getRegisteredAirlineCount.call();
         assert.equal(registeredFlightCnt, 1, "first airline is not registered when contract is deployed")
 
-        let registeredAirline = await config.flightSuretyData.isAirline(config.owner);
+        const registeredAirline = await config.flightSuretyData.isAirline(config.owner);
         assert.equal(registeredAirline, true, "first airline is not registered when contract is deployed")
     });
 
-    // it('Only existing airline may register a new airline until there are at least four airlines registered', async () => {
-    //     let fee = await config.flightSuretyApp.FLIGHT_NUMBER_REQUIREMENT_BEFORE_CONSENSUS.call();
-    //     let ownerAirlineIsRegistered = await config.flightSuretyData.isRegistered.call(ownerAirline);
-    //     config.flightSuretyApp.registerAirline(config.firstAirline, {from: config.owner});
-    // });
+    it('Only existing airline may register a new airline until there are at least four airlines registered', async () => {
+        // await config.flightSuretyApp.registerAirline(config.firstAirline, {from: config.owner});
+        // await config.flightSuretyApp.registerAirline(config.secondAirline, {from: config.owner});
+        // await config.flightSuretyApp.registerAirline(config.thirdAirline, {from: config.owner});
+        // const registeredFlightCnt = await config.flightSuretyData.getRegisteredAirlineCount.call();
+        // assert.equal(registeredFlightCnt, 4, "Only existing airline may register a new airline until there are at least four airlines registered")
+    });
 
+    it('Registration of fifth and subsequent airlines requires multi-party consensus of 50% of registered airlines', async () => {
+
+    });
+
+    it('Airline can be registered, but does not participate in contract until it submits funding of 10 ether', async () => {
+
+    });
+
+    it('Passengers may pay up to 1 ether for purchasing flight insurance', async () => {
+
+    });
+
+    it('If flight is delayed due to airline fault, passenger receives credit of 1.5X the amount they paid', async () => {
+
+    });
+
+    it('Passenger can withdraw any funds owed to them as a result of receiving credit for insurance payout', async () => {
+
+    });
 });
