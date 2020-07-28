@@ -96,18 +96,35 @@ contract('Flight Surety Tests', async (accounts) => {
         const registeredAirline = await config.flightSuretyData.isAirline.call(config.secondAirline, {from: config.owner});
         assert.equal(registeredAirline, true, "second airline is not registered")
 
-        await config.flightSuretyApp.registerAirline(config.thirdAirline, {from: config.owner});
-        await config.flightSuretyApp.registerAirline(config.forthAirline, {from: config.owner});
+        await config.flightSuretyApp.registerAirline(config.thirdAirline, {from: config.secondAirline});
+        await config.flightSuretyApp.registerAirline(config.forthAirline, {from: config.thirdAirline});
         const registeredFlightCnt = await config.flightSuretyData.getRegisteredAirlineCount.call({from: config.owner});
-        assert.equal(registeredFlightCnt, 4, "Only existing airline may register a new airline until there are at least four airlines registered")
+        assert.equal(registeredFlightCnt, 4, "airline is not registered if there are less than forth airline exist without consensus")
     });
 
     it('Registration of fifth and subsequent airlines requires multi-party consensus of 50% of registered airlines', async () => {
+        await config.flightSuretyApp.registerAirline(config.secondAirline, {from: config.owner});
+        await config.flightSuretyApp.registerAirline(config.thirdAirline, {from: config.secondAirline});
+        await config.flightSuretyApp.registerAirline(config.forthAirline, {from: config.thirdAirline});
 
+        await config.flightSuretyApp.registerAirline(config.fifthAirline, {from: config.owner});
+        await config.flightSuretyApp.registerAirline(config.fifthAirline, {from: config.secondAirline});
+        const registeredFlightCnt = await config.flightSuretyData.getRegisteredAirlineCount.call({from: config.owner});
+        assert.equal(registeredFlightCnt, 5, "fifth airline should be registered with 50% of consensus")
     });
 
-    it('Airline can be registered, but does not participate in contract until it submits funding of 10 ether', async () => {
+    it.only('Airline can be registered, but does not participate in contract until it submits funding of 10 ether', async () => {
+        await config.flightSuretyApp.registerAirline(config.secondAirline, {from: config.owner});
+        await config.flightSuretyData.fund(config.secondAirline, {from: config.owner, value: config.fund});
+        const isFunded = await config.flightSuretyData.isAirlineFunded(config.secondAirline, {from: config.owner});
+        assert.equal(isFunded, true, "airline is not funded")
 
+        const flightName = "test";
+        const flightTimestamp = 242113513;
+        const flightKey = await config.flightSuretyData.getFlightKey(config.secondAirline, flightName, flightTimestamp, {from: config.owner});
+        await config.flightSuretyData.registerFlight(config.secondAirline, flightName, flightTimestamp, {from: config.owner});
+        const isFlightRegistered = await config.flightSuretyData.isFlightRegistered(flightKey);
+        assert.equal(isFlightRegistered, true, "flight is not registered")
     });
 
     it('Passengers may pay up to 1 ether for purchasing flight insurance', async () => {

@@ -107,6 +107,11 @@ contract FlightSuretyData {
         _;
     }
 
+    modifier requireFundedAirline(address _airline) {
+        require(isAirlineFunded(_airline) == true, "Airline is not funded");
+        _;
+    }
+
     modifier requireRegisteredFlight(bytes32 _flightKey) {
         require(isFlightRegistered(_flightKey) == true, "Flight is not registered");
         _;
@@ -131,6 +136,10 @@ contract FlightSuretyData {
 
     function isAirlineRegistered(address _airline) public view returns (bool) {
         return registeredAirlines[_airline].isRegistered;
+    }
+
+    function isAirlineFunded(address _airline) public view returns (bool) {
+        return registeredAirlines[_airline].isFunded;
     }
 
     function isFlightRegistered(bytes32 _flightKey) public view returns (bool) {
@@ -185,7 +194,7 @@ contract FlightSuretyData {
         emit eventAirlineRegistered(_airline);
     }
 
-    function registerFlight(address _airline, string calldata _flight, uint256 _timestamp) external requireIsOperational isCallerAuthorized requireNot0xAddress(_airline) {
+    function registerFlight(address _airline, string calldata _flight, uint256 _timestamp) external requireIsOperational isCallerAuthorized requireFundedAirline(_airline) requireNot0xAddress(_airline) {
         bytes32 flightKey = getFlightKey(_airline, _flight, _timestamp);
         registeredFlights[flightKey].name = _flight;
         registeredFlights[flightKey].isRegistered = true;
