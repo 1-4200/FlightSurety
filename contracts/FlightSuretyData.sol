@@ -177,6 +177,10 @@ contract FlightSuretyData {
         return airlines.length;
     }
 
+    function getRegisteredFlightCount() external view returns (uint256) {
+        return flights.length;
+    }
+
     function registerFirstAirline(address airline) internal requireIsOperational requireNot0xAddress(airline) {
         registeredAirlines[airline] = Airline({isRegistered : true, isFunded : false, deposit : 0});
         airlines.push(airline);
