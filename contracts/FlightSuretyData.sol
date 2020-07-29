@@ -146,6 +146,19 @@ contract FlightSuretyData {
         return registeredFlights[_flightKey].isRegistered;
     }
 
+    function insuranceAmount(address _airline, string calldata _flight, uint256 _timestamp, address _passenger) external view returns (uint256) {
+        uint256 amount = 0;
+        bytes32 flightKey = getFlightKey(_airline, _flight, _timestamp);
+        uint insuranceCnt = registeredFlights[flightKey].insurances.length;
+        for (uint i = 0; i < insuranceCnt; i++) {
+            if (registeredFlights[flightKey].insurances[i].passenger == _passenger) {
+                amount = registeredFlights[flightKey].insurances[i].amount;
+                break;
+            }
+        }
+        return amount;
+    }
+
 
     /**
     * @dev Get operating status of contract

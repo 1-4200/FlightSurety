@@ -114,15 +114,18 @@ contract('Flight Surety Tests', async (accounts) => {
         let isFunded = await config.flightSuretyData.isAirlineFunded(config.secondAirline, {from: config.owner});
         assert.equal(isFunded, true, "airline is not funded");
 
-        let flightName = "test";
-        let flightTimestamp = 242113513;
-        await config.flightSuretyApp.registerFlight(config.secondAirline, flightName, flightTimestamp, {from: config.owner})
+        await config.flightSuretyApp.registerFlight(config.secondAirline, config.firstFlightName, config.firstFlightTimestamp, {from: config.owner})
         let registeredFlightCount = await config.flightSuretyData.getRegisteredFlightCount.call({from: config.owner});
         assert.equal(registeredFlightCount, 1, "flight is not registered")
     });
 
     it('Passengers may pay up to 1 ether for purchasing flight insurance', async () => {
-        
+        await config.flightSuretyData.buy(config.secondAirline, config.firstFlightName, config.firstFlightTimestamp, 2, {
+            from: config.owner,
+            value: config.insuranceFee
+        });
+        let amount = await config.flightSuretyData.insuranceAmount(config.secondAirline, config.firstFlightName, config.firstFlightTimestamp, config.owner, {from: config.owner});
+        assert.equal(amount, config.insuranceFee, "insurance is not bought");
     });
 
     it('If flight is delayed due to airline fault, passenger receives credit of 1.5X the amount they paid', async () => {

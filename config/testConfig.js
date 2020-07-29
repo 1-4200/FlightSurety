@@ -28,6 +28,10 @@ var Config = async function (accounts) {
     let fifthAirline = accounts[4];
     let sixthAirline = accounts[5];
     let fund = web3.utils.toWei('10', 'ether');
+    let insuranceFee = web3.utils.toWei('1', 'ether');
+
+    let firstFlightName = "test";
+    let firstFlightTimestamp = 242113513;
 
     let flightSuretyData = await FlightSuretyData.new({
         value: fund,
@@ -47,6 +51,9 @@ var Config = async function (accounts) {
         weiMultiple: (new BigNumber(10)).pow(18),
         testAddresses: testAddresses,
         fund: fund,
+        insuranceFee: insuranceFee,
+        firstFlightName: firstFlightName,
+        firstFlightTimestamp: firstFlightTimestamp,
         flightSuretyData: flightSuretyData,
         flightSuretyApp: flightSuretyApp
     }
