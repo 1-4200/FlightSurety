@@ -128,11 +128,7 @@ contract('Flight Surety Tests', async (accounts) => {
         assert.equal(amount, config.insuranceFee, "insurance is not bought");
     });
 
-    it('If flight is delayed due to airline fault, passenger receives credit of 1.5X the amount they paid', async () => {
-
-    });
-
-    it('Passenger can withdraw any funds owed to them as a result of receiving credit for insurance payout', async () => {
+    it('If flight is delayed due to airline fault, passenger receives credit of X the amount they paid', async () => {
 
     });
 });

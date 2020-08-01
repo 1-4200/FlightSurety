@@ -13,6 +13,7 @@ contract FlightSuretyData {
     bool private operational = true;                                    // Blocks all state changes throughout the contract if false
     mapping(address => bool) private authorizedContracts;
 
+
     struct Airline {
         bool isRegistered;
         bool isFunded;
@@ -25,7 +26,6 @@ contract FlightSuretyData {
     struct Insurance {
         address passenger;
         uint256 amount;
-        uint256 multiplier;
     }
 
     struct Flight {
@@ -48,7 +48,7 @@ contract FlightSuretyData {
     event eventAirlineRegistered(address airline);
     event eventFlightRegistered(address _airline, string _name, uint256 _timestamp);
     event eventFlightStatusUpdated(bytes32 _flightKey, uint8 _statusCode);
-    event eventInsurancePurchased(bytes32 flightKey, address passender, uint256 amount, uint256 multiplier);
+    event eventInsurancePurchased(bytes32 flightKey, address passender, uint256 amount);
     event eventInsuranceRefunded(bytes32 flightKey, address passender, uint256 refund);
 
     /**
@@ -231,23 +231,23 @@ contract FlightSuretyData {
      * @dev Buy insurance for a flight
      *
      */
-    function buy(address airline, string calldata flight, uint256 timestamp, uint256 multiplier) external payable requireIsOperational requireNot0xAddress(airline) requireRegisteredAirlineAddress(airline) {
+    function buy(address airline, string calldata flight, uint256 timestamp) external payable requireIsOperational requireNot0xAddress(airline) requireRegisteredAirlineAddress(airline) {
         bytes32 flightKey = getFlightKey(airline, flight, timestamp);
-        registeredFlights[flightKey].insurances.push(Insurance({passenger : msg.sender, amount : uint256(msg.value), multiplier : multiplier}));
-        emit eventInsurancePurchased(flightKey, msg.sender, uint256(msg.value), multiplier);
+        registeredFlights[flightKey].insurances.push(Insurance({passenger : msg.sender, amount : uint256(msg.value)}));
+        emit eventInsurancePurchased(flightKey, msg.sender, uint256(msg.value));
     }
 
     /**
      *  @dev Credits payouts to insurees
     */
-    function creditInsurees(bytes32 flightKey) external requireRegisteredFlight(flightKey) {
-        uint insuranceCnt = registeredFlights[flightKey].insurances.length;
+    function creditInsurees(bytes32 _flightKey) external requireRegisteredFlight(_flightKey) {
+        require(registeredFlights[_flightKey].statusCode == 20, 'Airline isn not delay');
+        uint insuranceCnt = registeredFlights[_flightKey].insurances.length;
         for (uint i = 0; i < insuranceCnt; i++) {
-            address passenger = registeredFlights[flightKey].insurances[i].passenger;
-            uint256 multiplier = registeredFlights[flightKey].insurances[i].multiplier;
-            uint256 refund = registeredFlights[flightKey].insurances[i].amount.mul(multiplier);
+            address passenger = registeredFlights[_flightKey].insurances[i].passenger;
+            uint256 refund = registeredFlights[_flightKey].insurances[i].amount.mul(3).div(2);
             passengersRefund[passenger] = refund;
-            emit eventInsuranceRefunded(flightKey, passenger, refund);
+            emit eventInsuranceRefunded(_flightKey, passenger, refund);
         }
     }
 
