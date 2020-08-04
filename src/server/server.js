@@ -31,8 +31,7 @@ function randomStatusCode() {
 }
 
 (async () => {
-    let accounts = await web3.eth.getAccounts(async (error, accounts) => {
-            const owner = accounts[0];
+    await web3.eth.getAccounts(async (error, accounts) => {
             for (let i = 0; i < ORACLES_COUNT; i++) {
                 await flightSuretyApp.methods.registerOracle().send({
                     from: accounts[i],
