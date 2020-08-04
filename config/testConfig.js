@@ -1,11 +1,11 @@
-var FlightSuretyApp = artifacts.require("FlightSuretyApp");
-var FlightSuretyData = artifacts.require("FlightSuretyData");
-var BigNumber = require('bignumber.js');
-var Web3 = require('web3');
+const FlightSuretyApp = artifacts.require("FlightSuretyApp");
+const FlightSuretyData = artifacts.require("FlightSuretyData");
+const BigNumber = require('bignumber.js');
+const Web3 = require('web3');
 
 let web3 = new Web3(new Web3.providers.WebsocketProvider('ws://127.0.0.1:7545'));
 
-var Config = async function (accounts) {
+const Config = async function (accounts) {
 
     // These test addresses are useful when you need to add
     // multiple users in test scripts
@@ -57,7 +57,7 @@ var Config = async function (accounts) {
         flightSuretyData: flightSuretyData,
         flightSuretyApp: flightSuretyApp
     }
-}
+};
 
 module.exports = {
     Config: Config

@@ -127,8 +127,4 @@ contract('Flight Surety Tests', async (accounts) => {
         let amount = await config.flightSuretyData.insuranceAmount(config.secondAirline, config.firstFlightName, config.firstFlightTimestamp, config.owner, {from: config.owner});
         assert.equal(amount, config.insuranceFee, "insurance is not bought");
     });
-
-    it('If flight is delayed due to airline fault, passenger receives credit of X the amount they paid', async () => {
-
-    });
 });
