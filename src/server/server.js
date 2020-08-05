@@ -3,7 +3,6 @@ import Config from './config.json';
 import Web3 from 'web3';
 import express from 'express';
 
-
 let config = Config['localhost'];
 let web3 = new Web3(new Web3.providers.WebsocketProvider(config.url.replace('http', 'ws')));
 web3.eth.defaultAccount = web3.eth.accounts[0];
@@ -25,35 +24,28 @@ const STATUS_CODES = [
     STATUS_CODE_LATE_OTHER
 ];
 let oracles = [];
+let gas = 4700000;
 
 function randomStatusCode() {
     return STATUS_CODES[Math.floor(Math.random() * STATUS_CODES.length)];
 }
 
 (async () => {
-    await web3.eth.getAccounts(async (error, accounts) => {
-            for (let i = 0; i < ORACLES_COUNT; i++) {
-                await flightSuretyApp.methods.registerOracle().send({
-                    from: accounts[i],
-                    value: web3.utils.toWei("1", "ether"),
-                }, async (error, result) => {
-                    if (error) {
-                        console.log(error);
-                    } else {
-                        await flightSuretyApp.methods.getMyIndexes().call({from: accounts[i]}, (error, result) => {
-                            if (error) {
-                                console.log(error);
-                            } else {
-                                let oracle = {address: accounts[a], index: result};
-                                console.log(`oracle: ${JSON.stringify(oracle)}`);
-                                oracles.push(oracle);
-                            }
-                        })
-                    }
-                })
-            }
+    let accounts = await web3.eth.getAccounts(async (error, accounts) => {
+        if (error) console.log(`ERROR: ${error}`);
+
+        let balance = await web3.eth.getBalance(accounts[0]);
+        console.log(accounts[0], "balance: ", balance, web3.utils.toWei("1", "ether"));
+
+        for (let i = 0; i < accounts.length; i++) {
+            await flightSuretyApp.methods.registerOracle().send({
+                from: accounts[i],
+                value: web3.utils.toWei("1", "ether"),
+                gas: gas
+            }).catch(e => console.log(`ERROR: ${e}`));
+            console.log(`account: ${accounts[i]} balance: ${await web3.eth.getBalance(accounts[0])}`)
         }
-    );
+    });
 
     await flightSuretyApp.events.OracleRequest({
         fromBlock: 0
@@ -77,7 +69,7 @@ function randomStatusCode() {
         }
         console.log(event)
     });
-})()
+})();
 
 const app = express();
 app.get('/api', (req, res) => {
