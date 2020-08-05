@@ -120,11 +120,13 @@ contract('Flight Surety Tests', async (accounts) => {
     });
 
     it('Passengers may pay up to 1 ether for purchasing flight insurance', async () => {
-        await config.flightSuretyData.buy(config.secondAirline, config.firstFlightName, config.firstFlightTimestamp, 2, {
+        await config.flightSuretyData.buy(config.secondAirline, config.firstFlightName, config.firstFlightTimestamp, {
             from: config.owner,
             value: config.insuranceFee
         });
-        let amount = await config.flightSuretyData.insuranceAmount(config.secondAirline, config.firstFlightName, config.firstFlightTimestamp, config.owner, {from: config.owner});
+        let amount = await config.flightSuretyData.insuranceAmount(config.secondAirline, config.firstFlightName, config.firstFlightTimestamp, config.owner, {
+            from: config.owner
+        });
         assert.equal(amount, config.insuranceFee, "insurance is not bought");
     });
 });
