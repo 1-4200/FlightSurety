@@ -5,7 +5,7 @@
 Truffle v5.1.24 (core: 5.1.24)
 Solidity - 0.6.0 (solc-js)
 Node v14.0.0
-Web3.js v1.2.1
+Web3.js v1.0.0-beta.55
 ```
 
 ## Install

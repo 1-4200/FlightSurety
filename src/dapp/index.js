@@ -8,7 +8,6 @@ import './flightsurety.css';
     let result = null;
 
     let contract = new Contract('localhost', () => {
-
         // Read transaction
         contract.isOperational((error, result) => {
             console.log(error, result);
@@ -18,7 +17,6 @@ import './flightsurety.css';
                 value: result
             }]);
         });
-
 
         // User-submitted transaction
         DOM.elid('submit-oracle').addEventListener('click', () => {
@@ -32,12 +30,8 @@ import './flightsurety.css';
                 }]);
             });
         })
-
     });
-
-
 })();
-
 
 function display(title, description, results) {
     let displayDiv = DOM.elid("display-wrapper");

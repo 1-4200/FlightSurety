@@ -3,7 +3,7 @@ const FlightSuretyData = artifacts.require("FlightSuretyData");
 const BigNumber = require('bignumber.js');
 const Web3 = require('web3');
 
-let web3 = new Web3(new Web3.providers.WebsocketProvider('ws://127.0.0.1:7545'));
+let web3 = new Web3(new Web3.providers.WebsocketProvider('ws://127.0.0.1:8545'));
 
 const Config = async function (accounts) {
 

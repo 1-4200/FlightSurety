@@ -45,7 +45,7 @@
     "truffle": "^5.1.34",
     "ts-loader": "^8.0.2",
     "typescript": "^3.9.7",
-    "web3": "^1.2.11",
+    "web3": "^1.0.0-beta.55",
     "webpack-node-externals": "^2.3.0"
   },
   "main": "truffle-config.js",

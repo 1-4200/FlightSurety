@@ -6,7 +6,7 @@ const Web3 = require('web3');
 
 module.exports = function (deployer, network, accounts) {
     if (network === "develop") {
-        let web3 = new Web3(new Web3.providers.WebsocketProvider('ws://127.0.0.1:7545'));
+        let web3 = new Web3(new Web3.providers.WebsocketProvider('ws://127.0.0.1:8545'));
         let fund = web3.utils.toWei('10', 'ether')
         let owner = accounts[0];
         deployer.deploy(FlightSuretyData, {from: owner, value: fund})
@@ -15,7 +15,7 @@ module.exports = function (deployer, network, accounts) {
                     .then(() => {
                         let config = {
                             localhost: {
-                                url: 'http://localhost:7545',
+                                url: 'http://localhost:8545',
                                 dataAddress: FlightSuretyData.address,
                                 appAddress: FlightSuretyApp.address
                             }
