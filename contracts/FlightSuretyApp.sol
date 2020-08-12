@@ -1,4 +1,4 @@
-pragma solidity ^0.6.0;
+pragma solidity 0.5.16 <= 0.6.0;
 
 // It's important to avoid vulnerabilities due to numeric overflow bugs
 // OpenZeppelin's SafeMath library, when used correctly, protects agains such bugs
@@ -313,13 +313,13 @@ contract FlightSuretyApp {
 }
 
 // FlightSuretyContract interface
-interface FlightSuretyData {
+contract FlightSuretyData {
     // UTILITY FUNCTIONS
     function isAirlineRegistered(address _airline) external view returns (bool);
 
     function isFlightRegistered(bytes32 _flightKey) external view returns (bool);
 
-    function isOperational() external view returns (bool);
+    function isOperational() public view returns (bool);
 
     function isAirline(address _airline) external view returns (bool);
 
@@ -334,6 +334,6 @@ interface FlightSuretyData {
 
     function creditInsuree(address passenger, address airline, string calldata flight, uint256 departureTimestamp) external returns (bool);
 
-fallback() external payable;
+function() external payable;
 
 }
