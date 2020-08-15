@@ -177,9 +177,9 @@ contract FlightSuretyApp {
         // Generate a unique key for storing the request
         bytes32 key = keccak256(abi.encodePacked(index, airline, flight, timestamp));
         oracleResponses[key] = ResponseInfo({
-            requester : msg.sender,
-            isOpen : true
-            });
+        requester : msg.sender,
+        isOpen : true
+        });
 
         emit OracleRequest(index, airline, flight, timestamp);
     }
@@ -237,9 +237,9 @@ contract FlightSuretyApp {
         uint8[3] memory indexes = generateIndexes(msg.sender);
 
         oracles[msg.sender] = Oracle({
-            isRegistered : true,
-            indexes : indexes
-            });
+        isRegistered : true,
+        indexes : indexes
+        });
     }
 
     function getMyIndexes() view external returns (uint8[3] memory) {
@@ -334,6 +334,5 @@ contract FlightSuretyData {
 
     function creditInsuree(address passenger, address airline, string calldata flight, uint256 departureTimestamp) external returns (bool);
 
-function() external payable;
-
+    function() external payable;
 }

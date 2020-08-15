@@ -13,7 +13,6 @@ contract FlightSuretyData {
     bool private operational = true;                                    // Blocks all state changes throughout the contract if false
     mapping(address => bool) private authorizedContracts;
 
-
     struct Airline {
         bool isRegistered;
         bool isFunded;
@@ -277,14 +276,12 @@ contract FlightSuretyData {
         return keccak256(abi.encodePacked(airline, flight, timestamp));
     }
 
-/**
-* @dev Fallback function for funding smart contract.
-*
-*/
+    /**
+    * @dev Fallback function for funding smart contract.
+    *
+    */
     function() external payable {
-fund(tx.origin);
-}
-
-
+        fund(tx.origin);
+    }
 }
 
