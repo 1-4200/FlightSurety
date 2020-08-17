@@ -1,7 +1,6 @@
 const FlightSuretyApp = artifacts.require("FlightSuretyApp");
 const FlightSuretyData = artifacts.require("FlightSuretyData");
 const fs = require('fs');
-const BigNumber = require('bignumber.js');
 const Web3 = require('web3');
 
 module.exports = function (deployer, network, accounts) {
