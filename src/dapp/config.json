@@ -1,6 +1,6 @@
 {
   "localhost": {
-    "url": "http://localhost:8545",
+    "url": "ws://localhost:8545",
     "dataAddress": "0x675e6604CDBa6904e1806A9623B1B3df43a7f8d2",
     "appAddress": "0xDC6d1f8580f8EdbA6Fb1B61D4BEA66Fc755c118c"
   }
