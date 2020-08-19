@@ -1,6 +1,5 @@
 <!doctype html>
 <html lang="en">
-
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -8,26 +7,76 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet">
     <link rel="icon" type="image/x-icon" href="favicon.ico">
 </head>
-
 <body>
-
-    <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
-        <a class="navbar-brand" href="#">FlightSurety</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault"
+<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+    <a class="navbar-brand" href="#">FlightSurety</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault"
+            aria-controls="navbarsExampleDefault"
             aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-    </nav>
-
-    <main class="container">
-
-        <div id="display-wrapper" class="top-20">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+</nav>
+<main class="container">
+    <div id="display-wrapper" class="top-20">
+    </div>
+    <div class="row top-20">
+        <div class="col-sm-12">
+            <label class="form">Flight</label> <input type="text" id="flight-number">
         </div>
-        <div class="row top-20">
-            <label class="form">Flight</label> <input type="text" id="flight-number"> <btn class="btn btn-primary" id="submit-oracle">Submit to Oracles</btn>
+        <div class="col-sm-12">
+            <btn class="btn btn-primary" id="submit-oracle">Submit to Oracles</btn>
         </div>
-    </main>
+        <hr>
+        <div class="col-sm-5 top-20">
+            <section>
+                <h2>Buy Insurance</h2>
+                <h5>Select a flight t insure</h5>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <label class="form">Flights</label>
+                        <select id="flights"></select>
+                    </div>
+                    <div class="col-sm-12">
+                        <btn class="btn btn-primary" id="purchase-insurance">Buy Insurance</btn>
+                    </div>
+                </div>
+            </section>
+        </div>
+        <hr>
+        <div class="col-sm-7 top-20">
+            <section>
+                <h2>Claim your insurance</h2>
+                <h5>Select a flight that you insured</h5>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <label class="form">Flights</label>
+                        <select id="insured-flights"></select>
+                    </div>
+                    <div class="col-sm-12">
+                        <btn class="btn btn-primary" id="claim-flight-insurance">Claim flight insurance</btn>
+                    </div>
+                </div>
+                <h5 class="top-20">Check if i have credit from insurance</h5>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <label class="form">My credits are <span id="credits-amount">0</span></label>
+                        <button class="btn btn-sm" id="check-credits-amount">Check credits</button>
+                    </div>
+                    <div class="col-sm-12">
+                        <label class="form">My address real balance <span id="address-balance">0</span></label>
+                        <button class="btn btn-sm" id="check-address-balance">Check balance</button>
+                    </div>
+                </div>
+                <h5 class="top-20">Withdraw insurance credits</h5>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <btn class="btn btn-primary" id="withdraw-credits">withdraw credits</btn>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
 
+</main>
 </body>
-
 </html>
