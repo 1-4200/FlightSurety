@@ -151,6 +151,13 @@ contract FlightSuretyApp {
         }
     }
 
+    function _getRegisteredFlightCount() external requireIsOperational view returns (uint256) {
+        return flightSuretyData.getRegisteredFlightCount();
+    }
+
+    function _getFlight(uint256 index) external requireIsOperational view returns (string memory name, uint256 updatedTimestamp, address airline, uint8 statusCode) {
+        return flightSuretyData.getFlight(index);
+    }
 
     /**
      * @dev Register a future flight for insuring.
@@ -324,6 +331,10 @@ contract FlightSuretyData {
     function isAirline(address _airline) external view returns (bool);
 
     // SMART CONTRACT FUNCTIONS
+    function getRegisteredFlightCount() external view returns (uint256);
+
+    function getFlight(uint256 index) external view returns (string memory name, uint256 updatedTimestamp, address airline, uint8 statusCode);
+
     function getRegisteredAirlineCount() external view returns (uint256);
 
     function registerAirline(address _airline) external;

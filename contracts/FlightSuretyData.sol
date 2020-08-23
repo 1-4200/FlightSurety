@@ -193,6 +193,14 @@ contract FlightSuretyData {
         return flights.length;
     }
 
+    function getFlight(uint256 index) external view returns (string memory name, uint256 updatedTimestamp, address airline, uint8 statusCode)
+    {
+        name = registeredFlights[flights[index]].name;
+        updatedTimestamp = registeredFlights[flights[index]].updatedTimestamp;
+        airline = registeredFlights[flights[index]].airline;
+        statusCode = registeredFlights[flights[index]].statusCode;
+    }
+
     function registerFirstAirline(address airline) internal requireIsOperational requireNot0xAddress(airline) {
         registeredAirlines[airline] = Airline({isRegistered : true, isFunded : false, deposit : 0});
         airlines.push(airline);
@@ -204,13 +212,13 @@ contract FlightSuretyData {
      *      Can only be called from FlightSuretyApp contract
      *
      */
-    function registerAirline(address _airline) external requireIsOperational isCallerAuthorized requireNot0xAddress(_airline) requireNotRegisteredAirlineAddress(_airline) {
+    function registerAirline(address _airline) external requireIsOperational requireNot0xAddress(_airline) requireNotRegisteredAirlineAddress(_airline) {
         registeredAirlines[_airline] = Airline({isRegistered : true, isFunded : false, deposit : 0});
         airlines.push(_airline);
         emit eventAirlineRegistered(_airline);
     }
 
-    function registerFlight(address _airline, string calldata _flight, uint256 _timestamp) external requireIsOperational isCallerAuthorized requireFundedAirline(_airline) requireNot0xAddress(_airline) {
+    function registerFlight(address _airline, string calldata _flight, uint256 _timestamp) external requireIsOperational requireNot0xAddress(_airline) {
         bytes32 flightKey = getFlightKey(_airline, _flight, _timestamp);
         registeredFlights[flightKey].name = _flight;
         registeredFlights[flightKey].isRegistered = true;
