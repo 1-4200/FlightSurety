@@ -18,6 +18,12 @@ import './flightsurety.css';
             }]);
         });
 
+        contract.getFlights((error, result) => {
+            console.log("getFlights", error, result);
+            displayFlights(result, 'oracle-flights');
+            displayFlights(result, 'insurance-flights');
+        });
+
         // User-submitted transaction
         DOM.elid('submit-oracle').addEventListener('click', () => {
             let flight = DOM.elid('flight-number').value;
@@ -30,8 +36,22 @@ import './flightsurety.css';
                 }]);
             });
         })
+
+        DOM.elid('purchase-insurance').addEventListener('click', () => {
+
+        })
     });
 })();
+
+function displayFlights(flights, id) {
+    const selectableFlights = DOM.elid(id);
+    flights.forEach((flight) => {
+        const option = document.createElement('option');
+        option.value = `${flight.airline}-${flight.name}-${flight.updatedTimestamp}`;
+        option.textContent = `${flight.name}`;
+        selectableFlights.appendChild(option);
+    });
+}
 
 function display(title, description, results) {
     let displayDiv = DOM.elid("display-wrapper");
@@ -45,7 +65,6 @@ function display(title, description, results) {
         section.appendChild(row);
     })
     displayDiv.append(section);
-
 }
 
 
