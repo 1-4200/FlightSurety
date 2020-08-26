@@ -55,14 +55,15 @@ export default class Contract {
         }
     }
 
-    async registerFlights() {
+    registerFlights() {
         const self = this;
         const length = self.airlines.length;
         for (let i = 0; i < length; i++) {
-            let res = await self.flightSuretyApp.methods
+            self.flightSuretyApp.methods
                 .registerFlight(self.airlines[i].airline, self.airlines[i].flight, self.airlines[i].time)
-                .send({from: self.owner, gas: 3000000});
-            console.log("res", res)
+                .send({from: self.owner, gas: 3000000}, (error, result) => {
+                    console.log(error, result)
+                });
         }
     }
 
@@ -80,12 +81,10 @@ export default class Contract {
             flight: flight,
             timestamp: timestamp
         }
-        console.log(payload.airline, payload.flight, payload.timestamp)
         self.flightSuretyApp.methods
             .fetchFlightStatus(payload.airline, payload.flight, payload.timestamp)
-            .call({from: self.owner}, (error, result) => {
-                console.log(error, result)
-                callback(error, result);
+            .send({from: self.owner}, (error, result) => {
+                callback(error, payload);
             });
     }
 
