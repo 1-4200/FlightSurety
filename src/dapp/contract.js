@@ -30,7 +30,6 @@ export default class Contract {
             for (let i = 1; i <= 5; i++) {
                 this.passengers.push(accts[i]);
             }
-            console.log(this.airlines)
             // this.registerAirlines();
             this.registerFlights();
 
@@ -57,13 +56,13 @@ export default class Contract {
     }
 
     async registerFlights() {
-        let self = this;
-        for (let i = 0; i < self.airlines.length; i++) {
-            await self.flightSuretyApp.methods
+        const self = this;
+        const length = self.airlines.length;
+        for (let i = 0; i < length; i++) {
+            let res = await self.flightSuretyApp.methods
                 .registerFlight(self.airlines[i].airline, self.airlines[i].flight, self.airlines[i].time)
-                .send({from: self.owner, gas: 3000000}, (error, result) => {
-                    console.log(error, result)
-                });
+                .send({from: self.owner, gas: 3000000});
+            console.log("res", res)
         }
     }
 
@@ -74,16 +73,18 @@ export default class Contract {
             .call({from: self.owner}, callback);
     }
 
-    fetchFlightStatus(flight, callback) {
+    fetchFlightStatus(airline, flight, timestamp, callback) {
         let self = this;
         let payload = {
-            airline: self.airlines[0].airline,
+            airline: airline,
             flight: flight,
-            timestamp: Math.floor(Date.now() / 1000)
+            timestamp: timestamp
         }
+        console.log(payload.airline, payload.flight, payload.timestamp)
         self.flightSuretyApp.methods
             .fetchFlightStatus(payload.airline, payload.flight, payload.timestamp)
-            .send({from: self.owner}, (error, result) => {
+            .call({from: self.owner}, (error, result) => {
+                console.log(error, result)
                 callback(error, result);
             });
     }

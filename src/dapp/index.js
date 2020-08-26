@@ -26,9 +26,11 @@ import './flightsurety.css';
 
         // User-submitted transaction
         DOM.elid('submit-oracle').addEventListener('click', () => {
-            let flight = DOM.elid('flight-number').value;
+            let airline = DOM.elid('oracle-flights').value;
+            let flight = DOM.elid('oracle-flights').options[DOM.elid('oracle-flights').selectedIndex].getAttribute('data-flight');
+            let timestamp = DOM.elid('oracle-flights').options[DOM.elid('oracle-flights').selectedIndex].getAttribute('data-timestamp');
             // Write transaction
-            contract.fetchFlightStatus(flight, (error, result) => {
+            contract.fetchFlightStatus(airline, flight, timestamp, (error, result) => {
                 display('Oracles', 'Trigger oracles', [{
                     label: 'Fetch Flight Status',
                     error: error,
@@ -47,7 +49,9 @@ function displayFlights(flights, id) {
     const selectableFlights = DOM.elid(id);
     flights.forEach((flight) => {
         const option = document.createElement('option');
-        option.value = `${flight.airline}-${flight.name}-${flight.updatedTimestamp}`;
+        option.setAttribute('data-flight', flight.name);
+        option.setAttribute('data-timestamp', flight.updatedTimestamp);
+        option.value = `${flight.airline}`;
         option.textContent = `${flight.name}`;
         selectableFlights.appendChild(option);
     });
