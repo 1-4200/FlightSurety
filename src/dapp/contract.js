@@ -103,4 +103,15 @@ export default class Contract {
         }
         callback(false, this.flights);
     };
+
+    async buy(airline, flight, timestamp, callback) {
+        let self = this;
+        let amount = this.web3.utils.toWei('1', 'ether').toString();
+
+        await self.flightSuretyData.methods
+            .buy(airline, flight, timestamp)
+            .send({ from: self.passengers[0], value: amount, gas: 3000000 }, (error, result) => {
+                callback(error, result);
+            });
+    }
 }

@@ -26,9 +26,10 @@ import './flightsurety.css';
 
         // User-submitted transaction
         DOM.elid('submit-oracle').addEventListener('click', () => {
-            let airline = DOM.elid('oracle-flights').value;
-            let flight = DOM.elid('oracle-flights').options[DOM.elid('oracle-flights').selectedIndex].getAttribute('data-flight');
-            let timestamp = DOM.elid('oracle-flights').options[DOM.elid('oracle-flights').selectedIndex].getAttribute('data-timestamp');
+            const selectedEle = DOM.elid('oracle-flights');
+            const airline = selectedEle.value;
+            const flight = selectedEle.options[selectedEle.selectedIndex].getAttribute('data-flight');
+            const timestamp = selectedEle.options[selectedEle.selectedIndex].getAttribute('data-timestamp');
             // Write transaction
             contract.fetchFlightStatus(airline, flight, timestamp, (error, result) => {
                 display('Oracles', 'Trigger oracles', [{
@@ -40,7 +41,13 @@ import './flightsurety.css';
         })
 
         DOM.elid('purchase-insurance').addEventListener('click', () => {
-
+            const selectedEle = DOM.elid('insurance-flights');
+            const airline = selectedEle.value;
+            const flight = selectedEle.options[selectedEle.selectedIndex].getAttribute('data-flight');
+            const timestamp = selectedEle.options[selectedEle.selectedIndex].getAttribute('data-timestamp');
+            contract.buy(airline, flight, timestamp, (error, result) => {
+                console.log("buy", error, result)
+            });
         })
     });
 })();
