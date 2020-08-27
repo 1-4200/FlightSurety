@@ -20,7 +20,7 @@ import './flightsurety.css';
 
         contract.getFlights((error, result) => {
             console.log("getFlights", error, result);
-            displayFlights(result, 'oracle-flights');
+            displayFlights([result[0]], 'oracle-flights');
             displayFlights([result[0]], 'insurance-flights');
             displayFlights([result[0]], 'insured-flights');
         });
