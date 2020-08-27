@@ -15,6 +15,21 @@ This repository contains Smart Contract code in Solidity (using Truffle), tests 
 To install, download or clone the repo, then:
 
 `npm install`
+
+## Edit
+
+Edit SafeMath.sol you installed from openzepplin To compile:
+
+node_modules/@openzeppelin/contracts/math/SafeMath.sol L:3
+```$xslt
+pragma solidity ^0.6.0;
+```
+
+Edit to below
+```$xslt
+pragma solidity 0.5.16 <= 0.6.0;
+```
+
 `truffle compile`
 
 ## Develop Client
