@@ -21,7 +21,7 @@ import './flightsurety.css';
         contract.getFlights((error, result) => {
             console.log("getFlights", error, result);
             displayFlights(result, 'oracle-flights');
-            displayFlights(result, 'insurance-flights');
+            displayFlights([result[0]], 'insurance-flights');
         });
 
         // User-submitted transaction
@@ -45,8 +45,13 @@ import './flightsurety.css';
             const airline = selectedEle.value;
             const flight = selectedEle.options[selectedEle.selectedIndex].getAttribute('data-flight');
             const timestamp = selectedEle.options[selectedEle.selectedIndex].getAttribute('data-timestamp');
-            contract.buy(airline, flight, timestamp, (error, result) => {
-                console.log("buy", error, result)
+            contract.buy(airline, flight, timestamp, (error, transactionHash) => {
+                console.log("buy", error, transactionHash)
+                display('Insurance', 'successfully bought!', [{
+                    label: 'Buy Insurance',
+                    error: error,
+                    value: transactionHash
+                }]);
             });
         })
     });

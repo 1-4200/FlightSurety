@@ -110,8 +110,8 @@ export default class Contract {
 
         await self.flightSuretyData.methods
             .buy(airline, flight, timestamp)
-            .send({ from: self.passengers[0], value: amount, gas: 3000000 }, (error, result) => {
-                callback(error, result);
+            .send({ from: self.passengers[0], value: amount, gas: 3000000 }, (error, transactionHash) => {
+                callback(error, transactionHash);
             });
     }
 }
