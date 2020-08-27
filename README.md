@@ -25,10 +25,12 @@ node_modules/@openzeppelin/contracts/math/SafeMath.sol L:3
 pragma solidity ^0.6.0;
 ```
 
-Edit to below
+Edit above code to below
 ```$xslt
 pragma solidity 0.5.16 <= 0.6.0;
 ```
+
+## Compile
 
 `truffle compile`
 
