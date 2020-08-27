@@ -1,12 +1,16 @@
 import FlightSuretyApp from '../../build/contracts/FlightSuretyApp.json';
+
 import Config from './config.json';
 import Web3 from 'web3';
 import express from 'express';
 
+
 let config = Config['localhost'];
 let web3 = new Web3(new Web3.providers.WebsocketProvider(config.url.replace('http', 'ws')));
 web3.eth.defaultAccount = web3.eth.accounts[0];
+
 let flightSuretyApp = new web3.eth.Contract(FlightSuretyApp.abi, config.appAddress);
+let registeredOracles = [];
 
 const ORACLES_COUNT = 20;
 const STATUS_CODE_UNKNOWN = 0;
@@ -23,53 +27,67 @@ const STATUS_CODES = [
     STATUS_CODE_LATE_TECHNICAL,
     STATUS_CODE_LATE_OTHER
 ];
-let oracles = [];
-let gas = 4700000;
+let gas = 3000000;
 
 function randomStatusCode() {
     return STATUS_CODES[Math.floor(Math.random() * STATUS_CODES.length)];
 }
 
-(async () => {
-    let accounts = await web3.eth.getAccounts(async (error, accounts) => {
-        if (error) console.log(`ERROR: ${error}`);
+web3.eth.getAccounts(async (error, accounts) => {
+    web3.eth.defaultAccount = accounts[0];
+    for (let i = 0; i < ORACLES_COUNT; i++) {
+        let oracleAccount = accounts[i]
 
-        let balance = await web3.eth.getBalance(accounts[0]);
-        console.log(accounts[0], "balance: ", balance, web3.utils.toWei("1", "ether"));
+        await flightSuretyApp.methods.registerOracle().send({
+            from: oracleAccount,
+            value: web3.utils.toWei("1", "ether"),
+            gas: gas
+        }, async (error, result) => {
+            await flightSuretyApp.methods.getMyIndexes().call({
+                from: oracleAccount
+            }, (error, indexesResult) => {
+                if (!error) {
+                    registeredOracles.push({address: oracleAccount, index: indexesResult})
+                }
+            })
+        })
+    }
+})
 
-        for (let i = 0; i < accounts.length; i++) {
-            await flightSuretyApp.methods.registerOracle().send({
-                from: accounts[i],
-                value: web3.utils.toWei("1", "ether"),
-                gas: gas
-            }).catch(e => console.log(`ERROR: ${e}`));
-            console.log(`account: ${accounts[i]} balance: ${await web3.eth.getBalance(accounts[0])}`)
+
+flightSuretyApp.events.OracleRequest({
+    fromBlock: 0
+}, async function (error, event) {
+    if (error) {
+        console.log(error)
+    }
+    let statusCode = randomStatusCode()
+    let indexes;
+    let oracle;
+    for (let i = 0; i < registeredOracles.length; i++) {
+        indexes = registeredOracles[i].index;
+        oracle = registeredOracles[i].address
+        console.log("indexes", indexes)
+        console.log("oracle", oracle)
+        try {
+            await flightSuretyApp.methods.submitOracleResponse(
+                event.returnValues.index,
+                event.returnValues.airline,
+                event.returnValues.flight,
+                event.returnValues.timestamp,
+                statusCode
+            ).send({from: oracle, gas: gas}, (error, result) => {
+                if (error) {
+                    console.log(error);
+                } else {
+                    console.log(result);
+                }
+            })
+        } catch (e) {
+            console.log(e);
         }
-    });
-
-    await flightSuretyApp.events.OracleRequest({
-        fromBlock: 0
-    }, async (error, event) => {
-        if (error) {
-            console.log(error)
-        } else {
-            const {index, airline, flight, timestamp} = event.returnValues;
-            const statusCode = randomStatusCode();
-            for (let i = 0; i < ORACLES_COUNT; i++) {
-                await flightSuretyApp.methods.submitOracleResponse(index, airline, flight, timestamp, statusCode).send({
-                    from: oracles[i].address
-                }, (error, result) => {
-                    if (error) {
-                        console.log(error)
-                    } else {
-                        console.log(`${JSON.stringify(oracles[i])}: status:  ${statusCode}`);
-                    }
-                })
-            }
-        }
-        console.log(event)
-    });
-})();
+    }
+});
 
 const app = express();
 app.get('/api', (req, res) => {
@@ -79,5 +97,4 @@ app.get('/api', (req, res) => {
 })
 
 export default app;
-
 
