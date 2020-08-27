@@ -110,8 +110,29 @@ export default class Contract {
 
         await self.flightSuretyData.methods
             .buy(airline, flight, timestamp)
-            .send({ from: self.passengers[0], value: amount, gas: 3000000 }, (error, transactionHash) => {
+            .send({from: self.passengers[0], value: amount, gas: 3000000}, (error, transactionHash) => {
                 callback(error, transactionHash);
             });
-    }
+    };
+
+    async pay(passenger, callback) {
+        let self = this;
+
+        await self.flightSuretyData.methods
+            .pay(passenger)
+            .send({from: self.passengers[0], gas: 3000000}, (error, transactionHash) => {
+                callback(error, transactionHash);
+            });
+    };
+
+    async creditInsurees(airline, flight, timestamp, callback) {
+        let self = this;
+
+        await self.flightSuretyData.methods
+            .creditInsurees(airline, flight, timestamp)
+            .send({from: self.passengers[0], gas: 3000000}, (error, transactionHash) => {
+                console.log(error, transactionHash)
+                callback(error, transactionHash);
+            });
+    };
 }

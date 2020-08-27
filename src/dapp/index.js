@@ -22,6 +22,7 @@ import './flightsurety.css';
             console.log("getFlights", error, result);
             displayFlights(result, 'oracle-flights');
             displayFlights([result[0]], 'insurance-flights');
+            displayFlights([result[0]], 'insured-flights');
         });
 
         // User-submitted transaction
@@ -54,6 +55,27 @@ import './flightsurety.css';
                 }]);
             });
         })
+
+        DOM.elid('withdraw-credits').addEventListener('click', () => {
+            contract.pay(contract.passengers[0], (error, transactionHash) => {
+                console.log("withdraw", error, transactionHash)
+                display('Withdraw', 'successfully withdraw!', [{
+                    label: 'Withdraw Credit',
+                    error: error,
+                    value: transactionHash
+                }]);
+            });
+        })
+
+        DOM.elid('claim-flight-insurance').addEventListener('click', () => {
+            const selectedEle = DOM.elid('insurance-flights');
+            const airline = selectedEle.value;
+            const flight = selectedEle.options[selectedEle.selectedIndex].getAttribute('data-flight');
+            const timestamp = selectedEle.options[selectedEle.selectedIndex].getAttribute('data-timestamp');
+            contract.creditInsurees(airline, flight, timestamp, (error, transactionHash) => {
+                console.log("creditInsurees", error, transactionHash)
+            });
+        });
     });
 })();
 

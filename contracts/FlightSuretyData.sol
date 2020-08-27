@@ -247,14 +247,15 @@ contract FlightSuretyData {
     /**
      *  @dev Credits payouts to insurees
     */
-    function creditInsurees(bytes32 _flightKey) external requireRegisteredFlight(_flightKey) {
-        require(registeredFlights[_flightKey].statusCode == 20, 'Airline isn not delay');
-        uint insuranceCnt = registeredFlights[_flightKey].insurances.length;
+    function creditInsurees(address _airline, string calldata _flight, uint256 _timestamp) external requireIsOperational requireRegisteredAirlineAddress(_airline) {
+        bytes32 flightKey = getFlightKey(_airline, _flight, _timestamp);
+        require(registeredFlights[flightKey].statusCode == 20, 'Airline is not delayed');
+        uint insuranceCnt = registeredFlights[flightKey].insurances.length;
         for (uint i = 0; i < insuranceCnt; i++) {
-            address passenger = registeredFlights[_flightKey].insurances[i].passenger;
-            uint256 refund = registeredFlights[_flightKey].insurances[i].amount.mul(3).div(2);
+            address passenger = registeredFlights[flightKey].insurances[i].passenger;
+            uint256 refund = registeredFlights[flightKey].insurances[i].amount.mul(3).div(2);
             passengersRefund[passenger] = refund;
-            emit eventInsuranceRefunded(_flightKey, passenger, refund);
+            emit eventInsuranceRefunded(flightKey, passenger, refund);
         }
     }
 

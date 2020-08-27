@@ -343,7 +343,7 @@ contract FlightSuretyData {
 
     function setFlightStatus(bytes32 flightKey, uint8 statusCode) external;
 
-    function creditInsuree(address passenger, address airline, string calldata flight, uint256 departureTimestamp) external returns (bool);
+    function creditInsuree(address _airline, string calldata _flight, uint256 _timestamp) external;
 
     function() external payable;
 }
